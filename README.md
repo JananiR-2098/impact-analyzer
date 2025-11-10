@@ -43,7 +43,7 @@ cd impact-analyzer
 Run with defaults (no cloning unless enabled in properties):
 
 ```bat
-cd "C:\Users\Lakshmi S\IdeaProjects\impact-analyzer"
+cd "C:\Users\IdeaProjects\impact-analyzer"
 gradlew.bat build
 gradlew.bat bootRun
 ```
