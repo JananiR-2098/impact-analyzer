@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 public class DependencyGraph {
 
     private final Map<String, GraphNode> nodes;
+    private final Map<String, Map<String, EdgeMetadata>> edgeMetadata = new ConcurrentHashMap<>();
 
     public DependencyGraph() {
         this.nodes = new ConcurrentHashMap<>();
@@ -30,6 +31,7 @@ public class DependencyGraph {
         Objects.requireNonNull(target, "target cannot be null");
         nodes.computeIfAbsent(source, GraphNode::new)
                 .addDependency(nodes.computeIfAbsent(target, GraphNode::new));
+        edgeMetadata.computeIfAbsent(source, s -> new ConcurrentHashMap<>()).computeIfAbsent(target, t -> new EdgeMetadata());
     }
 
     public Collection<GraphNode> getAllNodes() {
@@ -52,5 +54,15 @@ public class DependencyGraph {
             ));
         }
         return Collections.unmodifiableMap(snap);
+    }
+
+    public EdgeMetadata getEdgeMetadata(String source, String target) {
+        Map<String, EdgeMetadata> m = edgeMetadata.get(source);
+        if (m == null) return null;
+        return m.get(target);
+    }
+
+    public Map<String, Map<String, EdgeMetadata>> getAllEdgeMetadata() {
+        return Collections.unmodifiableMap(edgeMetadata);
     }
 }

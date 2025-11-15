@@ -39,6 +39,10 @@ public class DependencyAnalyzerProperties {
     private int chatRetryCount;
     private long chatRetryDelayMs;
 
+    // Graph/criticality properties
+    private int graphCriticalInDegreeThreshold = 5; // default
+    private boolean graphMarkCrossPackageCritical = true; // default
+
     public String getBaseDir() {
         return baseDir;
     }
@@ -171,5 +175,22 @@ public class DependencyAnalyzerProperties {
 
     public void setChatRetryDelayMs(long chatRetryDelayMs) {
         this.chatRetryDelayMs = chatRetryDelayMs;
+    }
+
+    // Graph/criticality getters/setters
+    public int getGraphCriticalInDegreeThreshold() {
+        return graphCriticalInDegreeThreshold;
+    }
+
+    public void setGraphCriticalInDegreeThreshold(int graphCriticalInDegreeThreshold) {
+        this.graphCriticalInDegreeThreshold = graphCriticalInDegreeThreshold;
+    }
+
+    public boolean isGraphMarkCrossPackageCritical() {
+        return graphMarkCrossPackageCritical;
+    }
+
+    public void setGraphMarkCrossPackageCritical(boolean graphMarkCrossPackageCritical) {
+        this.graphMarkCrossPackageCritical = graphMarkCrossPackageCritical;
     }
 }
