@@ -1,9 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { InputPromptComponent } from './input-prompt/input-prompt.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, InputPromptComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
