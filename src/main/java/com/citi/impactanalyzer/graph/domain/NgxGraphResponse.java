@@ -36,19 +36,26 @@ public class NgxGraphResponse {
         private final String source;
         private final String target;
         private final String label;
+        private final boolean critical;
 
         public NgxLink(String source, String target) {
-            this(source, target, "depends");
+            this(source, target, "depends", false);
         }
 
         public NgxLink(String source, String target, String label) {
+            this(source, target, label, false);
+        }
+
+        public NgxLink(String source, String target, String label, boolean critical) {
             this.source = source;
             this.target = target;
             this.label = label;
+            this.critical = critical;
         }
 
         public String getSource() { return source; }
         public String getTarget() { return target; }
         public String getLabel() { return label; }
+        public boolean isCritical() { return critical; }
     }
 }
