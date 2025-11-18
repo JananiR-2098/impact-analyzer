@@ -1,4 +1,4 @@
-import { Component,OnInit, Output, EventEmitter } from '@angular/core';
+import { Component,OnInit, Output, EventEmitter, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,7 +20,7 @@ export class SidebarComponent  {
 
   panelData: any = null;
 
-  constructor(public panel: Sidepanel, private sharedservice: Sharedservice) {
+  constructor(@Inject(Sidepanel) public panel: Sidepanel, private sharedservice: Sharedservice) {
 
   }
 

@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild  } from '@angular/core';
+import { Component, signal, ViewChild, Inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { InputPromptComponent } from './input-prompt/input-prompt.component';
 import { HttpClient, HttpClientModule  } from '@angular/common/http';
@@ -20,7 +20,7 @@ export class App {
 
   constructor(
     private http: HttpClient,
-    private panel: Sidepanel,
+    @Inject(Sidepanel) private panel: Sidepanel,
     private shared: Sharedservice
   ) {}
 
