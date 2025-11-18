@@ -6,3 +6,24 @@
 h3 {
   margin-top: 0;
 }
+
+.sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: linear-gradient(90deg,#6bffab,#a855f7 60%);
+  color: white;
+  border-radius: 4px;
+}
+
+.sidebar__title { font-weight: 600; }
+
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  min-height: 100vh;
+  background: #f7fafc;
+}

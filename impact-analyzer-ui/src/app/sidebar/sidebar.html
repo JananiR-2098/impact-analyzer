@@ -1,9 +1,17 @@
-<h3>Messages</h3>
-
-<div *ngFor="let m of messages">
-  <b>{{ m.role }}:</b> {{ m.text }}
+<div class="header_box">
+    <div class="header_box__title">Impact Graph
+      <button mat-icon-button color="primary" (click)="downloadPDF()" aria-label="Download PDF" style="margin-top: 2rem;">
+        <mat-icon>download</mat-icon>
+      </button>
+   </div>  
 </div>
 
-<br>
-
-<button mat-button color="primary">Close</button>
+<div #pdfContent>
+  <h1>Angular PDF Demo</h1>
+  <p>This content will be included in the generated PDF file.</p>
+  <ul>
+    <li>List Item One</li>
+    <li>List Item Two</li>
+    <li>List Item Three</li>
+  </ul>
+</div>

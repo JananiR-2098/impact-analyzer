@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PdfGenerator } from './pdf-generator';
+import { ChatPrompt } from './chat-prompt';
 
-describe('PdfGenerator', () => {
-  let component: PdfGenerator;
-  let fixture: ComponentFixture<PdfGenerator>;
+describe('ChatPrompt', () => {
+  let component: ChatPrompt;
+  let fixture: ComponentFixture<ChatPrompt>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PdfGenerator]
+      imports: [ChatPrompt]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PdfGenerator);
+    fixture = TestBed.createComponent(ChatPrompt);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

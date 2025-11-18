@@ -1,26 +1,16 @@
 <main class="main">
   <div class="content">
     <div class="container">
-      
-      <div class="left-section">
-        <app-input-prompt></app-input-prompt>
+
+        <div class="left-section">
+          <app-input-prompt></app-input-prompt>
+        </div>
+
+        <div class="right-section">
+          <app-sidebar></app-sidebar>
+        </div>
+
       </div>
-
-      <mat-sidenav-container class="sidenav-container">
-
-        <mat-sidenav #rightSidenav
-                     mode="over"
-                     position="end"
-                     [opened]="isSidebarOpen"
-                     class="right-panel">
-
-            <app-sidebar></app-sidebar>
-
-        </mat-sidenav>
-
-      </mat-sidenav-container>
-
-    </div>
 
   </div>
 </main>
