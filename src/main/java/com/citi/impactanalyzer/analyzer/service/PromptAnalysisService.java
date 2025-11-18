@@ -136,7 +136,7 @@ public class PromptAnalysisService {
     public static String getResponseFromAssistant(Assistant assistant, String userPrompt) {
         String userQuery = String.format("""
                 You are a JSON code analyzer.
-                Analyze the following JSON input carefully. %s
+                Analyze the following user input carefully. %s
                 Identify the single most relevant impacted class name.
                 Return only the class name as plain text, with no explanation or additional formatting.
                 """, userPrompt);
