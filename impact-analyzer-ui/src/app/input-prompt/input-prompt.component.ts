@@ -1,5 +1,7 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Chatservice } from '../services/chatservice';
+import { Sharedservice } from '../services/sharedservice';
 
 interface Msg { role: 'user' | 'assistant'; text: string }
 
@@ -11,6 +13,9 @@ interface Msg { role: 'user' | 'assistant'; text: string }
   styleUrls: ['./input-prompt.component.css']
 })
 export class InputPromptComponent {
+
+  constructor(private chatService: Chatservice, private sharedservice: Sharedservice) {}
+
   messages: Msg[] = [{ role: 'assistant', text: 'Hi — how can I help you today?' }];
   visible = true;
 
@@ -24,11 +29,16 @@ export class InputPromptComponent {
     this.input.nativeElement.value = '';
     this.scrollBottom();
 
-    // Simulated assistant reply (replace with backend call)
-    setTimeout(() => {
-      this.messages.push({ role: 'assistant', text: 'This is a sample assistant reply. Replace with your backend.' });
-      this.scrollBottom();
-    }, 700);
+      // Call backend
+    this.chatService.sendToBackend(v)
+      .subscribe(response => {
+        // Response mapping depends on backend shape
+        this.messages.push({
+          role: 'assistant',
+          text: response.reply  
+        });
+      });
+    this.sharedservice.openPanel(this.messages);
   }
 
   onKeydown(ev: KeyboardEvent) {
@@ -38,6 +48,7 @@ export class InputPromptComponent {
     }
   }
 
+  
   close() { this.visible = false; }
 
   private scrollBottom() {
