@@ -136,11 +136,13 @@ public class PromptAnalysisService {
     public static String getResponseFromAssistant(Assistant assistant, String userPrompt) {
         String userQuery = String.format("""
                 You are a JSON code analyzer.
-                Provide only one relevant impacted class name for userPrompt '%s'
+                Analyze the following JSON input carefully. %s
+                Identify the single most relevant impacted class name.
+                Return only the class name as plain text, with no explanation or additional formatting.
                 """, userPrompt);
 
         String assistantResponse = assistant.chat(userQuery);
-        logger.info("User Query: {}", userQuery);
+        logger.info("User Query: {}", userPrompt);
         logger.info("Assistant Response: {}", assistantResponse);
         return assistantResponse;
     }
