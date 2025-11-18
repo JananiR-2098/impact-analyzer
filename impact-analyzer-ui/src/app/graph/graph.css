@@ -1,0 +1,17 @@
+.graph-wrapper {
+  width: 100%;
+  height: 600px;
+  border: 1px solid #ddd;
+}
+
+::ng-deep .node rect {
+  fill: #4c84ff !important;
+  stroke: #222 !important;
+  rx: 8;
+  ry: 8;
+}
+
+::ng-deep .edge path {
+  stroke: black !important;
+  stroke-width: 2;
+}

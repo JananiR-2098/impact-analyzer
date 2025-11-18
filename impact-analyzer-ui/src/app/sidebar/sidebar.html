@@ -1,8 +1,16 @@
-<h3>Messages</h3>
+<h3>Prompt Message</h3>
+<p>{{promptMessage}}</p>
 
-<div *ngFor="let m of messages">
-  <b>{{ m.role }}:</b> {{ m.text }}
+<div class="graph-wrapper">
+
+  
+<h3>Graph</h3>
+
+<app-graph *ngIf="graphData" [graph]="graphData">
+</app-graph>
+
 </div>
+<p>{{testPlan}}</p>
 
 <br>
 
