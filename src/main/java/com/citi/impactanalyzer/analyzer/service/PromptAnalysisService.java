@@ -156,7 +156,7 @@ public class PromptAnalysisService {
     }
 
     public String getTestPlan(String query, String impactedFileJson) throws IOException {
-        String prompt = """
+        var prompt = """
                 You are a software test plan generator.
                 You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
                 Analyse the repository structure, functionality, public methods, and potential risks.
@@ -169,8 +169,8 @@ public class PromptAnalysisService {
                 
                 Here is the repository JSON for the impacted files:
                 """ + impactedFileJson + " Here are the changes the developer wants to make to the code " + query;
-        String answer = assistant.chat(prompt);
-        System.out.println(answer);
+        var answer = assistant.chat(prompt);
+        logger.info("Assistant Response for Test Plan: {}", answer);
         return answer;
     }
 }
