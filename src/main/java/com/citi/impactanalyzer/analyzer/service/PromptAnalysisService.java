@@ -31,6 +31,10 @@ public class PromptAnalysisService {
 
     private static final Logger logger = LoggerFactory.getLogger(PromptAnalysisService.class);
 
+    private static final int MAX_RESULTS = 2;
+    private static final double MIN_SCORE = 0.6;
+    private static final int CHAT_MEMORY_SIZE = 10;
+
     @Value("${graph.json.path}")
     private String graphJsonPath;
 
@@ -43,76 +47,80 @@ public class PromptAnalysisService {
     @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
     private String modelName;
 
-    Assistant assistant;
-    EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
-    EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
+    private Assistant assistant;
+    private final EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
+    private final EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
 
     @PostConstruct
     public void init() throws IOException {
-        logger.info("GraphService init...");
-        assistant = createAssistant();
-        LoadEmbeddingStore();
+        logger.info("Initializing PromptAnalysisService...");
+        this.assistant = createAssistant();
+        loadEmbeddingStore();
     }
 
-    private void LoadEmbeddingStore() throws IOException {
-        logger.info("Loading EmbeddingStore...");
+    private void loadEmbeddingStore() throws IOException {
+        logger.info("Loading EmbeddingStore from {}", graphJsonPath);
+
         File jsonFile = new File(graphJsonPath);
         if (!jsonFile.exists()) {
-            logger.warn("Graph JSON file not found at: {} - will skip building graph", graphJsonPath);
+            logger.warn("Graph JSON file not found at: {} - skipping embedding store build", graphJsonPath);
             return;
         }
+
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(jsonFile);
+
         if (root == null || !root.isArray()) {
-            logger.warn("Cannot vectorize: root JSON is not an array");
+            logger.warn("Invalid JSON format: root is not an array");
             return;
         }
 
         int count = 0;
         for (JsonNode node : root) {
-            if (!node.has("source"))
-                continue;
+            if (!node.has("source")) continue;
 
             String id = node.get("source").asText();
-            if (id == null || id.isBlank())
-                continue;
+            if (id == null || id.isBlank()) continue;
 
             try {
                 TextSegment textSegment = TextSegment.from(node.toString());
                 Embedding embedding = embeddingModel.embed(node.toString()).content();
                 embeddingStore.add(embedding, textSegment);
                 count++;
-
             } catch (Exception e) {
                 logger.error("Vectorization failed for node: {}", id, e);
             }
         }
+
+        logger.info("Successfully vectorized {} nodes into embedding store", count);
     }
 
-    public String findNodeFromPrompt(String userPrompt) throws IOException {
+    public String findNodeFromPrompt(String userPrompt) {
         return getResponseFromAssistant(assistant, userPrompt);
     }
 
-    private Assistant createAssistant() throws IOException {
-        logger.info("creating Assistant...");
-        QueryTransformer queryTransformer = new CompressingQueryTransformer(VertexAiGeminiChatModel.builder()
-                .project(projectId)
-                .location(location)
-                .modelName(modelName)
-                .build());
+    private Assistant createAssistant() {
+        logger.info("Creating Assistant...");
+
+        QueryTransformer queryTransformer = new CompressingQueryTransformer(
+                VertexAiGeminiChatModel.builder()
+                        .project(projectId)
+                        .location(location)
+                        .modelName(modelName)
+                        .build()
+        );
 
         ContentRetriever contentRetriever = EmbeddingStoreContentRetriever.builder()
                 .embeddingStore(embeddingStore)
                 .embeddingModel(embeddingModel)
-                .maxResults(2)
-                .minScore(0.6)
+                .maxResults(MAX_RESULTS)
+                .minScore(MIN_SCORE)
                 .build();
 
         RetrievalAugmentor retrievalAugmentor = DefaultRetrievalAugmentor.builder()
                 .queryTransformer(queryTransformer)
                 .contentRetriever(contentRetriever)
                 .build();
-
 
         return AiServices.builder(Assistant.class)
                 .chatModel(VertexAiGeminiChatModel.builder()
@@ -121,28 +129,27 @@ public class PromptAnalysisService {
                         .modelName(modelName)
                         .build())
                 .retrievalAugmentor(retrievalAugmentor)
-                .chatMemory(MessageWindowChatMemory.withMaxMessages(10))
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(CHAT_MEMORY_SIZE))
                 .build();
     }
 
     public static String getResponseFromAssistant(Assistant assistant, String userPrompt) {
         String userQuery = String.format("""
                 You are a JSON code analyzer.
-                
-                You have to Analyze and give only one relevant impacted class name for userPrompt '%s'
+                Provide only one relevant impacted class name for userPrompt '%s'
                 """, userPrompt);
+
         String assistantResponse = assistant.chat(userQuery);
-        logger.info("User = {} ", userQuery);
-        logger.info("Assistant = {} ", assistantResponse);
+        logger.info("User Query: {}", userQuery);
+        logger.info("Assistant Response: {}", assistantResponse);
         return assistantResponse;
     }
 
-    public String getTestPlan(String prompt) throws IOException {
-        Assistant assistant = createAssistant();
-        String userQuery = " Analyze and give for " + prompt;
+    public String getTestPlan(String prompt) {
+        String userQuery = "Analyze and provide test plan for: " + prompt;
         String answer = assistant.chat(userQuery);
-        logger.info("User = {} ", userQuery);
-        logger.info("Assistant ={} ", answer);
+        logger.info("User Query: {}", userQuery);
+        logger.info("Assistant Response: {}", answer);
         return answer;
     }
 }
