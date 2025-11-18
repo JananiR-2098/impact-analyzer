@@ -3,7 +3,6 @@ import { RouterOutlet } from '@angular/router';
 import { InputPromptComponent } from './input-prompt/input-prompt.component';
 import { HttpClient, HttpClientModule  } from '@angular/common/http';
 import { SidebarComponent } from './sidebar/sidebar';
-import { Sidepanel } from './services/sidepanel';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { Sharedservice } from './services/sharedservice';
 
@@ -20,7 +19,6 @@ export class App {
 
   constructor(
     private http: HttpClient,
-    private panel: Sidepanel,
     private shared: Sharedservice
   ) {}
 
