@@ -233,7 +233,7 @@ public class GraphService {
         List<NgxGraphResponse.NgxNode> nodes = visited.stream()
                 .map(NgxGraphResponse.NgxNode::new)
                 .collect(Collectors.toList());
-        return new NgxGraphResponse(nodes, links);
+        return new NgxGraphResponse(nodes, links, null);
     }
 
     private void buildNgxLinks(GraphNode node, Set<String> visited, List<NgxGraphResponse.NgxLink> links, DependencyGraph graph) {
