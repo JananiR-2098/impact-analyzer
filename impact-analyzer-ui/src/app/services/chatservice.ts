@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { PromptResponse } from '../models/prompt-response';
 
 @Injectable({ providedIn: 'root' })
 export class Chatservice {
@@ -11,5 +12,9 @@ export class Chatservice {
 
   sendToBackend(msg: string): Observable<any> {
     return this.http.post(this.API_URL, { text: msg });
+  }
+
+  getPromptResponse(msg: string): Observable<PromptResponse> {
+    return this.http.post<PromptResponse>(this.API_URL, { text: msg });
   }
 }
