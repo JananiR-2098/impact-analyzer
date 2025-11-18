@@ -7,6 +7,9 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Pre-requisities
 Install node.js and npm
+npm install jspdf html2canvas
+npm install @angular/material @angular/cdk
+
 
 ## Building
 
