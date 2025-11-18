@@ -119,4 +119,23 @@ public class PromptAnalysisService {
         logger.info("Assistant ={} ", answer);
         return answer;
     }
+
+    public String getTestPlan(String query, String impactedFileJson) throws IOException {
+        String prompt = """
+                You are a software test plan generator.
+                You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
+                Analyse the repository structure, functionality, public methods, and potential risks.
+                
+                Your task:
+                - Generate a complete TEST PLAN for the impacted files in the JSON.
+                - Include the following sections in the test plan:
+                - Test scenarios based on code functionality given in the JSON.
+                - Integration test plan based on other controller interactions
+                
+                Here is the repository JSON for the impacted files:
+                """ + impactedFileJson + " Here are the changes the developer wants to make to the code " + query;
+        String answer = assistant.chat(prompt);
+        System.out.println(answer);
+        return answer;
+    }
 }

@@ -6,14 +6,18 @@ public class NgxGraphResponse {
 
     private final List<NgxNode> nodes;
     private final List<NgxLink> links;
+    private final List<NgxTestPlan> testPlans;
 
-    public NgxGraphResponse(List<NgxNode> nodes, List<NgxLink> links) {
+    public NgxGraphResponse(List<NgxNode> nodes, List<NgxLink> links, List<NgxTestPlan> testPlans) {
         this.nodes = nodes != null ? nodes : List.of();
         this.links = links != null ? links : List.of();
+        this.testPlans = testPlans != null ? testPlans : List.of();
     }
 
     public List<NgxNode> getNodes() { return nodes; }
     public List<NgxLink> getLinks() { return links; }
+    public List<NgxTestPlan> getTestPlans() { return testPlans;}
+
 
     public static class NgxNode {
         private final String id;
@@ -57,5 +61,17 @@ public class NgxGraphResponse {
         public String getTarget() { return target; }
         public String getLabel() { return label; }
         public boolean isCritical() { return critical; }
+    }
+
+    public static class NgxTestPlan {
+        private final String Title;
+        private final String testPlan;
+
+        public NgxTestPlan(String title, String testPlan) {
+            Title = title;
+            this.testPlan = testPlan;
+        }
+        public String getTitle() { return Title; }
+        public String getTestPlan() { return testPlan; }
     }
 }
