@@ -2,7 +2,6 @@ import { Component,OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
-import { Sidepanel } from '../services/sidepanel';
 import { Sharedservice } from '../services/sharedservice';
 
 interface Msg { role: 'user' | 'assistant'; text: string }
@@ -20,7 +19,7 @@ export class SidebarComponent  {
 
   panelData: any = null;
 
-  constructor(public panel: Sidepanel, private sharedservice: Sharedservice) {
+  constructor(private sharedservice: Sharedservice) {
 
   }
 
