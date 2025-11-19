@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PromptAnalysisService {
@@ -95,7 +97,8 @@ public class PromptAnalysisService {
         logger.info("Successfully vectorized {} nodes into embedding store", count);
     }
 
-    public String findNodeFromPrompt(String userPrompt) {
+
+    public List<String> findNodeFromPrompt(String userPrompt) {
         return getResponseFromAssistant(assistant, userPrompt);
     }
 
@@ -133,18 +136,27 @@ public class PromptAnalysisService {
                 .build();
     }
 
-    public static String getResponseFromAssistant(Assistant assistant, String userPrompt) {
+    public static List<String> getResponseFromAssistant(Assistant assistant, String userPrompt) {
         String userQuery = String.format("""
                 You are a JSON code analyzer.
                 Analyze the following user input carefully. %s
-                Identify the single most relevant impacted class name.
-                Return only the class name as plain text, with no explanation or additional formatting.
+                Identify all relevant impacted class names (comma separated if multiple).
+                Return only the class names as plain text, separated by commas, with no explanation or additional formatting.
                 """, userPrompt);
 
         String assistantResponse = assistant.chat(userQuery);
         logger.info("User Query: {}", userPrompt);
         logger.info("Assistant Response: {}", assistantResponse);
-        return assistantResponse;
+        List<String> nodes = new ArrayList<>();
+        if (assistantResponse != null && !assistantResponse.isBlank()) {
+            for (String part : assistantResponse.split(",")) {
+                String node = part.trim();
+                if (!node.isEmpty()) {
+                    nodes.add(node);
+                }
+            }
+        }
+        return nodes;
     }
 
     public String getTestPlan(String prompt) {

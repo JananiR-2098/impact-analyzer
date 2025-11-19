@@ -17,7 +17,6 @@ class PromptAnalysisServiceTest {
 
     private PromptAnalysisService service;
     private Assistant mockAssistant;
-    private EmbeddingModel mockEmbeddingModel;
     private EmbeddingStore<TextSegment> mockEmbeddingStore;
 
     @BeforeEach
@@ -30,7 +29,7 @@ class PromptAnalysisServiceTest {
         ReflectionTestUtils.setField(service, "modelName", "gemini-test-model");
 
         mockAssistant = mock(Assistant.class);
-        mockEmbeddingModel = mock(EmbeddingModel.class);
+        EmbeddingModel mockEmbeddingModel = mock(EmbeddingModel.class);
         mockEmbeddingStore = mock(EmbeddingStore.class);
 
 
@@ -43,16 +42,33 @@ class PromptAnalysisServiceTest {
     void testFindNodeFromPrompt_returnsAssistantResponse() throws IOException {
         String prompt = "Find impacted class for Adding Address functionality in Owner";
         when(mockAssistant.chat(anyString())).thenReturn("Owner");
-        String result = service.findNodeFromPrompt(prompt);
-        assertEquals("Owner", result);
+        java.util.List<String> result = service.findNodeFromPrompt(prompt);
+        assertEquals(java.util.List.of("Owner"), result);
+        verify(mockAssistant, times(1)).chat(anyString());
+    }
+
+    @Test
+    void testFindNodeFromPrompt_returnsMultipleNodes() throws IOException {
+        String prompt = "Find impacted classes for Adding Address functionality in Owner";
+        when(mockAssistant.chat(anyString())).thenReturn("Owner,Address");
+        java.util.List<String> result = service.findNodeFromPrompt(prompt);
+        assertEquals(java.util.List.of("Owner", "Address"), result);
         verify(mockAssistant, times(1)).chat(anyString());
     }
 
     @Test
     void testGetResponseFromAssistant_staticMethod() {
         when(mockAssistant.chat(anyString())).thenReturn("Owner");
-        String result = PromptAnalysisService.getResponseFromAssistant(mockAssistant, "Customer prompt");
-        assertEquals("Owner", result);
+        java.util.List<String> result = PromptAnalysisService.getResponseFromAssistant(mockAssistant, "Customer prompt");
+        assertEquals(java.util.List.of("Owner"), result);
+        verify(mockAssistant, times(1)).chat(anyString());
+    }
+
+    @Test
+    void testGetResponseFromAssistant_staticMethodMultipleNodes() {
+        when(mockAssistant.chat(anyString())).thenReturn("Owner,Address");
+        java.util.List<String> result = PromptAnalysisService.getResponseFromAssistant(mockAssistant, "Customer prompt");
+        assertEquals(java.util.List.of("Owner", "Address"), result);
         verify(mockAssistant, times(1)).chat(anyString());
     }
 

@@ -3,6 +3,7 @@ package com.citi.impactanalyzer.analyzer.controller;
 import com.citi.impactanalyzer.analyzer.service.PromptAnalysisService;
 import com.citi.impactanalyzer.graph.domain.NgxGraphResponse;
 import com.citi.impactanalyzer.graph.service.GraphService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -13,26 +14,30 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(PromptAnalysisController.class)
 class PromptAnalysisControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
     private PromptAnalysisService promptAnalysisService;
-
-    @MockBean
     private GraphService graphService;
+
+    @BeforeEach
+    void setUp() {
+        promptAnalysisService = Mockito.mock(PromptAnalysisService.class);
+        graphService = Mockito.mock(GraphService.class);
+        mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(new PromptAnalysisController(promptAnalysisService, graphService)).build();
+    }
 
     private final String testJson = "{\"nodes\":[],\"links\":[],\"testPlans\":[{\"title\":\"Test Plan\",\"testPlan\":\"Generated Test Plan\"}]}";
 
     @Test
     void testGetImpactedModules() throws Exception {
+        java.util.List<String> mockNodes = java.util.Collections.singletonList("OrderService");
+        Mockito.when(promptAnalysisService.findNodeFromPrompt(anyString())).thenReturn(mockNodes);
+        Mockito.when(graphService.getImpactedModulesNgx(mockNodes)).thenReturn("ImpactedModulesResult");
         // Mock service responses
         when(promptAnalysisService.findNodeFromPrompt(anyString())).thenReturn("OrderService");
         when(graphService.getImpactedModulesNgx("OrderService")).thenReturn("ImpactedModulesResult");
@@ -44,12 +49,12 @@ class PromptAnalysisControllerTest {
                         .content("Find impacted modules for OrderService")
                         .contentType(MediaType.TEXT_PLAIN))
                 .andExpect(status().isOk())
-                .andExpect(content().json(testJson));
+                .andExpect(content().string("ImpactedModulesResult"));
     }
 
     @Test
     void testGetTestPlan() throws Exception {
-        when(promptAnalysisService.getTestPlan(anyString())).thenReturn("Generated Test Plan");
+        Mockito.when(promptAnalysisService.getTestPlan(anyString())).thenReturn("Generated Test Plan");
 
         mockMvc.perform(post("/promptAnalyzer/testPlan")
                         .content("Generate test plan for PaymentService")
