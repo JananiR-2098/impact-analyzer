@@ -1,19 +1,27 @@
-<div class="input-prompt" *ngIf="visible" aria-hidden="false">
-  <div class="input-prompt__panel" role="dialog" aria-label="Assistant chat">
-    <div class="input-prompt__header">
-      <div class="input-prompt__title">Impact Analyzer</div>
-      <button class="input-prompt__close" aria-label="Close" (click)="close()">×</button>
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="chat-header__title">Impact Analyzer Chat Window</div> 
     </div>
 
-    <div class="input-prompt__messages" #messagesContainer tabindex="0">
-      <div *ngFor="let m of messages" class="input-prompt__message" [ngClass]="{'input-prompt__message--user': m.role === 'user', 'input-prompt__message--assistant': m.role === 'assistant'}">
-        <div class="input-prompt__bubble">{{ m.text }}</div>
-      </div>
+    <div class="messages-container" #messagesContainer>
+        <div *ngFor="let message of messages" 
+            class="message" 
+            [ngClass]="{'user-message': message.sender === 'user', 'bot-message': message.sender === 'Mia'}">
+          <div class="message-content">
+            <span class="sender-name">{{ message.sender ==='user' ? 'You'
+                : 'Mia'}}: </span>
+            <span>{{ message.text }}</span>
+            <span class="timestamp">{{formatTimestamp(message.timestamp) }} </span>
+          </div>
+        </div>
     </div>
 
-    <div class="input-prompt__composer">
-      <textarea #input class="input-prompt__input" rows="1" placeholder="Share the requirement..." aria-label="Message" (keydown)="onKeydown($event)"></textarea>
-      <button class="input-prompt__send" (click)="send()" aria-label="Send">Analyze</button>
+    <div class="chat-input-area">
+        <input type="text" 
+            [(ngModel)]="newMessage"
+            (keyup.enter)="sendMessage()"
+            placeholder="Type your message..." 
+            class="chat-input">
+        <button (click)="sendMessage()" class="send-button">Send</button>
     </div>
-  </div>
 </div>

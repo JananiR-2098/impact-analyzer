@@ -37,20 +37,6 @@ export class SidebarComponent  {
     });
   }
 
-  @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
-  downloadPDF() {
-    const DATA = this.pdfContent.nativeElement;
-    html2canvas(DATA).then(canvas => {
-      const imgWidth = 208;
-      const pageHeight = 295;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      const contentDataURL = canvas.toDataURL('image/png');
-      let pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(contentDataURL, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save('download.pdf');
-    });
-  }
-
   async exportPDF() {
     const element = document.getElementById('exportSection');
 
@@ -58,8 +44,6 @@ export class SidebarComponent  {
       console.error("PDF element not found");
       return;
     }
-
-    //document.body.setAttribute("@.disabled", "true");
 
     await new Promise(res => setTimeout(res, 200));
 
@@ -90,7 +74,6 @@ export class SidebarComponent  {
       heightLeft -= pageHeight;
     }
 
-    pdf.save('sidebar-export.pdf');
+    pdf.save('impact-analysis-document.pdf');
   }
-
 }

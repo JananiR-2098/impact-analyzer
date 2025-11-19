@@ -1,4 +1,8 @@
-<h3>Messages</h3>
+<h3> Analysis
+   <button mat-icon-button color="primary" (click)="exportPDF()" aria-label="Download PDF"> 
+          <mat-icon>download</mat-icon>
+      </button>
+</h3>
 
 <div id="exportSection"> <!-- PDF Target -->
   <div class="testplan">
@@ -6,16 +10,14 @@
     <pre>{{ promptMessage }}</pre>  
  </div>
   <div class="graph-wrapper">
-    <h3>Graph</h3>
+    <h3>Graph : </h3>
     <app-graph *ngIf="graphData" [graph]="graphData"></app-graph>
   </div>
 
   <div class="testplan">
-    <h3>Test Plan</h3>
+    <h3>Test Plan :</h3>
     <pre>{{ testPlan }}</pre>
   </div>
 </div>
 
 <br />
-
-<button mat-button color="primary" (click)="exportPDF()">Export PDF</button>
