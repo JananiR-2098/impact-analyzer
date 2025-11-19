@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/promptAnalyzer")
 public class PromptAnalysisController {
@@ -25,8 +27,8 @@ public class PromptAnalysisController {
     @PostMapping("/impactedModules")
     public ResponseEntity<?> getImpactedModules(@RequestBody String prompt) {
         logger.info("Received request to analyze impacted modules for prompt: {}", prompt);
-        String node = promptAnalysisService.findNodeFromPrompt(prompt);
-        Object impactedModules = graphService.getImpactedModulesNgx(node);
+        List<String> nodes = promptAnalysisService.findNodeFromPrompt(prompt);
+        Object impactedModules = graphService.getImpactedModulesNgx(nodes);
         return ResponseEntity.ok(impactedModules);
     }
 
