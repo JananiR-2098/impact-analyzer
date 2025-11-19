@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -85,4 +86,13 @@ class PromptAnalysisServiceTest {
         assertEquals("Generated Test Plan", result);
         verify(mockAssistant, times(1)).chat(anyString());
     }
+
+    @Test
+    void getTestPlanWithImpactedFileJsonReturnsGeneratedTestPlan() throws IOException {
+        when(mockAssistant.chat(anyString())).thenReturn("Generated Test Plan");
+        var result = service.getTestPlan("Adding Address functionality", "{\"nodes\":[]}");
+        assertEquals("Generated Test Plan", result);
+        verify(mockAssistant, times(1)).chat(anyString());
+    }
+
 }
