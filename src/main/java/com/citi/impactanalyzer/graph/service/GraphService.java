@@ -219,7 +219,7 @@ public class GraphService {
 
         DependencyGraph graph = getGraph();
         Set<String> processed = new HashSet<>();
-        List<NgxGraphResponse> subgraphs = new ArrayList<>();
+        List<NgxGraphResponse> graphs = new ArrayList<>();
         for (String node : nodes) {
             if (node != null && !node.isBlank()) {
                 Set<String> visited = new HashSet<>();
@@ -234,15 +234,15 @@ public class GraphService {
                     List<NgxGraphResponse.NgxNode> resultNodes = newNodes.stream()
                             .map(NgxGraphResponse.NgxNode::new)
                             .toList();
-                    subgraphs.add(new NgxGraphResponse(resultNodes, links));
+                    graphs.add(new NgxGraphResponse(resultNodes, links, List.of()));
                     processed.addAll(newNodes);
                 }
             }
         }
-        if (subgraphs.isEmpty()) {
+        if (graphs.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "No matching nodes found for: " + nodes));
         }
-        return new NgxGraphMultiResponse(subgraphs);
+        return new NgxGraphMultiResponse(graphs);
     }
 
     private void buildNgxLinks(GraphNode node, Set<String> visited, List<NgxGraphResponse.NgxLink> links, DependencyGraph graph) {
