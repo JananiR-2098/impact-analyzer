@@ -1,17 +1,18 @@
 <h3>Prompt Message</h3>
 <p>{{promptMessage}}</p>
 
-<div class="graph-wrapper">
 
-  
-<h3>Graph</h3>
+<div #pdfContent>
+    <div class="graph-wrapper">
+        <h3> Graph </h3>
+        <button mat-icon-button color="primary" (click)="downloadPDF()" aria-label="Download PDF" style="margin-top: 2rem;">
+             <mat-icon>download</mat-icon>
+        </button>
+        <app-graph *ngIf="graphData" [graph]="graphData"></app-graph>
+    </div>
 
-<app-graph *ngIf="graphData" [graph]="graphData">
-</app-graph>
-
+    <p>{{testPlan}}</p>
+    <br>
 </div>
-<p>{{testPlan}}</p>
-
-<br>
 
 <button mat-button color="primary">Close</button>
