@@ -1,18 +1,21 @@
-<h3>Prompt Message</h3>
-<p>{{promptMessage}}</p>
+<h3>Messages</h3>
 
+<div id="exportSection"> <!-- PDF Target -->
+  <div class="testplan">
+    <h3>Prompt Message</h3>
+    <pre>{{ promptMessage }}</pre>  
+ </div>
+  <div class="graph-wrapper">
+    <h3>Graph</h3>
+    <app-graph *ngIf="graphData" [graph]="graphData"></app-graph>
+  </div>
 
-<div #pdfContent>
-    <div class="graph-wrapper">
-        <h3> Graph </h3>
-        <button mat-icon-button color="primary" (click)="downloadPDF()" aria-label="Download PDF" style="margin-top: 2rem;">
-             <mat-icon>download</mat-icon>
-        </button>
-        <app-graph *ngIf="graphData" [graph]="graphData"></app-graph>
-    </div>
-
-    <p>{{testPlan}}</p>
-    <br>
+  <div class="testplan">
+    <h3>Test Plan</h3>
+    <pre>{{ testPlan }}</pre>
+  </div>
 </div>
 
-<button mat-button color="primary">Close</button>
+<br />
+
+<button mat-button color="primary" (click)="exportPDF()">Export PDF</button>
