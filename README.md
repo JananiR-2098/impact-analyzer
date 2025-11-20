@@ -24,11 +24,6 @@ Prerequisites
 - Java 11+ installed and available on PATH.
 - Git (optional, used if you enable automatic cloning).
 - (Optional) Access to an LLM provider if you want to run the real LLM-based dependency extraction. If you don't have LLM access, you can disable aggregation and place a pre-generated JSON in `build/analysis/dependency-graph.json`.
-- If you use Vertex AI or other Google Cloud services locally, set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to point to your service account JSON key file.
-   - Create or download a JSON key for a service account with the required Vertex AI permissions and save it somewhere secure on your machine (example: `C:\keys\vertex-key.json` or `/home/user/.keys/vertex-key.json`).
-   - Windows GUI ("Edit environment variable for your account")
-     - Variable name: GOOGLE_APPLICATION_CREDENTIALS
-     - Variable value: C:\keys\vertex-key.json
 
 1) Clone the repo (if you haven't already)
 
