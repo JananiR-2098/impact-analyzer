@@ -48,13 +48,13 @@
 
 .user-message {
     align-self: flex-end;
-    background: #e0f7fa;/*linear-gradient(180deg, #0ea5a3, #0b9a97);*/
+    background: #e0f7fa;
     color: #212121;
 }
 
 .bot-message {
     align-self: flex-start;
-    background: #f1f1f1 /*linear-gradient(180deg, #ffffff, #f3f4f6);*/;
+    background: #f1f1f1;
     color: #333;
 }
 

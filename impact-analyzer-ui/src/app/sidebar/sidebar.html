@@ -1,14 +1,15 @@
 <div class="analysis-container">
   <div class="analysis-header">
-    <div class="analysis-title">Analysis
-      <button mat-icon-button color="primary" (click)="exportPDF()" aria-label="Download PDF">
-        <mat-icon>download</mat-icon>
+    <div class="analysis-title">Analysis</div>
+    <div class="analysis-actions">
+      <button mat-icon-button color="primary" style="font-size: 5px;" (click)="exportPDF()" aria-label="Download PDF">
+        <mat-icon>download</mat-icon> 
       </button>
-      </div>
     </div>
+  </div>
   
 
-  <div id="exportSection" class="analysis-body"> <!-- PDF Target -->
+  <div id="exportSection" class="analysis-body">
     <div class="analysis-outputs">
 
       <div class="output output-prompt">
