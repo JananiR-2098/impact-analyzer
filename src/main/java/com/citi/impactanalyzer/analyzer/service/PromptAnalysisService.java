@@ -188,13 +188,9 @@ public class PromptAnalysisService {
     
             Your task:
             - Generate a complete TEST PLAN for the impacted files in the JSON.
-            - Include the following sections in the test plan:
-            - Test scenarios based on code functionality given in the JSON.
-            - Integration test plan based on other controller interactions
-    
-            Here is the repository JSON for the impacted files: %s
+            - The test plan should include unit tests, integration tests, and system tests.
             Here are the changes the developer wants to make to the code %s";
-            """.formatted(impactedFileJson, changeRequest);
+            """.formatted(changeRequest);
     }
 
     private List<String> extractClassList(String response) {

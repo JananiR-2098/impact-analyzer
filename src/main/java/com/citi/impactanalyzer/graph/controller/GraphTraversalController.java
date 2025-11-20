@@ -52,6 +52,6 @@ public class GraphTraversalController {
 
     @GetMapping("/impactedModules")
     public ResponseEntity<?> getImpactedModulesNgx(@RequestParam List<String> nodes) {
-        return ResponseEntity.ok(graphService.getImpactedModulesNgx(nodes));
+        return ResponseEntity.ok(graphService.getImpactedModulesNgx(nodes, null));
     }
 }

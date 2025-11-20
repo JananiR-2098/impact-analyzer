@@ -212,7 +212,7 @@ public class GraphService {
         return fqName.substring(0, idx);
     }
 
-    public Object getImpactedModulesNgx(List<String> nodes) {
+    public Object getImpactedModulesNgx(List<String> nodes, String testPlan) {
         if (nodes == null || nodes.isEmpty() || nodes.stream().allMatch(s -> s == null || s.isBlank())) {
             return ResponseEntity.badRequest().body(Map.of("error", "nodes parameter is required"));
         }
@@ -232,9 +232,9 @@ public class GraphService {
                 newNodes.removeAll(processed);
                 if (!newNodes.isEmpty()) {
                     List<NgxGraphResponse.NgxNode> resultNodes = newNodes.stream()
-                            .map(NgxGraphResponse.NgxNode::new)
+                            .map(name -> new NgxGraphResponse.NgxNode(name, isNodeCritical(node, name)))
                             .toList();
-                    graphs.add(new NgxGraphResponse(resultNodes, links, List.of()));
+                    graphs.add(new NgxGraphResponse(resultNodes, links));
                     processed.addAll(newNodes);
                 }
             }
@@ -242,8 +242,17 @@ public class GraphService {
         if (graphs.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "No matching nodes found for: " + nodes));
         }
-        return new NgxGraphMultiResponse(graphs);
+        return new NgxGraphMultiResponse(graphs, new NgxGraphMultiResponse.NgxTestPlan("Test Plan", testPlan));
     }
+
+    private boolean isNodeCritical(String impactedNode, String nodeName) {
+        if (impactedNode == null || nodeName == null) return false;
+        if (nodeName.contains(impactedNode.toLowerCase())) {
+            return true;
+        }
+        return false;
+    }
+
 
     private void buildNgxLinks(GraphNode node, Set<String> visited, List<NgxGraphResponse.NgxLink> links, DependencyGraph graph) {
         if (node == null || visited.contains(node.getName())) return;
