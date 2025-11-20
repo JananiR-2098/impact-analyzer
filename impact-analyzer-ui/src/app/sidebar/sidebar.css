@@ -12,9 +12,9 @@ h3 {
     flex-direction: column;
     position: fixed;
     right: 10px;
-    top: 10vh;
-    width: 48vw;
-    height: 90vh;
+    top: 8vh;
+    width: 58vw;
+    height: 90vh; 
 
     border: 1px solid #e0e0e0;
     border-radius: 8px;
@@ -25,11 +25,11 @@ h3 {
 }
 
 .analysis-header {
-   padding: 12px 16px;
+   padding: 8px 10px;
    background: linear-gradient(90deg, #63b9d8, #676f6c 40%);
    border-bottom: 1px solid #e0e0e0;
    color: #333;
-   font-size: 1.05em;
+   font-size: 1.15em;
    font-weight: 600;
    display: flex;
    align-items: center;
@@ -53,14 +53,16 @@ h3 {
 .analysis-body {
   padding: 12px 16px;
   overflow-y: auto;
-  flex: 1 1 auto;
+  overflow-y: hidden;
+  flex: 1;
   background: #fff;
+  padding-right: 8px;
 }
 
 .analysis-outputs {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
 .output {

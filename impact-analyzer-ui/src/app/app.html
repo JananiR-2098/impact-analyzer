@@ -2,7 +2,9 @@
     <div class="content">
     <div class="container">
         <div class="left-section" style="padding: 20px; display: flex; justify-content: center;">
-          <app-input-prompt></app-input-prompt>
+          <app-input-prompt [style.width.px]="chatBoxWidth" (messageSent)="onChatBoxMessageSent()">
+
+          </app-input-prompt>
         </div>
 
         <div class="right-section">
