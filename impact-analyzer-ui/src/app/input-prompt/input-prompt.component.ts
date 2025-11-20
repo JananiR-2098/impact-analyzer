@@ -1,33 +1,56 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 import { Chatservice } from '../services/chatservice';
 import { Sharedservice } from '../services/sharedservice';
-import { Msg } from '../models/msg';
+import { Message } from '../models/msg';
 
 @Component({
   selector: 'app-input-prompt',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './input-prompt.component.html',
-  styleUrls: ['./input-prompt.component.css']
+  styleUrls: ['./input-prompt.component.css'],
 })
-export class InputPromptComponent {
+
+export class InputPromptComponent implements OnInit, AfterViewChecked {
+
   constructor(private chatService: Chatservice, private sharedservice: Sharedservice) {}
 
-  messages: Msg[] = [{ role: 'assistant', text: 'Hi — how can I help you today?' }];
-  visible = true;
-  @ViewChild('input') input!: ElementRef<HTMLTextAreaElement>;
-  @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLDivElement>;
 
-  send() {
-    const v = this.input?.nativeElement.value?.trim();
-    if (!v) return;
-    this.messages.push({ role: 'user', text: v });
-    this.input.nativeElement.value = '';
-    this.scrollBottom();
+  messages: Message[] = [];
+  newMessage = '';
+  private shouldScrollToBottom = false;
 
-      // Call backend
-    this.chatService.getPromptResponse(v)
+  ngOnInit(): void {
+      this.messages = [
+          { text: 'Hello! I am Mia, your AI assistant. How can I help you today?', sender: 'Mia', timestamp: new Date() }
+      ];
+      this.shouldScrollToBottom = true;
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.shouldScrollToBottom) {
+      this.scrollToBottom();
+      this.shouldScrollToBottom = false;
+    }
+  }
+
+  sendMessage(): void {
+    if (this.newMessage.trim()) {
+      const v = this.newMessage.trim();
+      if (!v) return;
+      
+      this.messages.push({ text: this.newMessage.trim(), sender: 'user', timestamp: new Date() });
+      this.newMessage = '';
+      this.shouldScrollToBottom = true;
+
+      this.messages.push({ text: 'Understanding the requirement. Analyzing the impacts based on your input. Please wait for graph rendering', sender: 'Mia', timestamp: new Date() });
+      this.shouldScrollToBottom = true;
+    
+       this.chatService.getPromptResponse(v)
       .subscribe(response => {
         console.log ("Received response from backend:", response);
         const graphData = response.graphData; 
@@ -38,21 +61,18 @@ export class InputPromptComponent {
           graphData: graphData,
           testPlan: testPlan});
       });
+    }    
   }
 
-  onKeydown(ev: KeyboardEvent) {
-    if (ev.key === 'Enter' && !ev.shiftKey) {
-      ev.preventDefault();
-      this.send();
+  private scrollToBottom(): void {
+    try {
+      this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+    } catch (err) {
+      console.error('Error scrolling to bottom:', err);
     }
   }
 
-  
-  close() { this.visible = false; }
-
-  private scrollBottom() {
-    setTimeout(() => {
-      try { this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight; } catch (e) {}
-    });
+  formatTimestamp(date: Date): string {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 }
