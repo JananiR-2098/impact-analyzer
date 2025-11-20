@@ -173,10 +173,9 @@ public class PromptAnalysisService {
             Your task:
             - Analyze the JSON structure.
             - Understand the user request: '%s'
-            - Return ALL impacted class names (comma-separated).
             - DO NOT invent class names.
             - Exclude test classes.
-            - Return ONLY the class names, no explanation.
+            - Return only the class names(present in JSON) as plain text, separated by commas, with no explanation or additional formatting.
             """.formatted(userPrompt);
     }
 
