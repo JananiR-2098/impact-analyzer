@@ -1,6 +1,5 @@
 package com.citi.impactanalyzer.analyzer.service;
 
-import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +8,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -18,7 +16,7 @@ class PromptAnalysisServiceTest {
 
     private PromptAnalysisService service;
     private Assistant mockAssistant;
-    private EmbeddingStore<TextSegment> mockEmbeddingStore;
+    private EmbeddingStore<?> mockEmbeddingStore;
 
     String testSessionId = "test";
 
@@ -33,8 +31,9 @@ class PromptAnalysisServiceTest {
 
         mockAssistant = mock(Assistant.class);
         EmbeddingModel mockEmbeddingModel = mock(EmbeddingModel.class);
-        mockEmbeddingStore = mock(EmbeddingStore.class);
-
+        @SuppressWarnings("unchecked")
+        EmbeddingStore<?> tmpStore = mock(EmbeddingStore.class);
+        mockEmbeddingStore = tmpStore;
 
         ReflectionTestUtils.setField(service, "assistant", mockAssistant);
         ReflectionTestUtils.setField(service, "embeddingModel", mockEmbeddingModel);
@@ -42,16 +41,16 @@ class PromptAnalysisServiceTest {
     }
 
     @Test
-    void testFindNodeFromPrompt_returnsAssistantResponse() throws IOException {
-        String prompt = "Find impacted class for Adding Address functionality in Owner";       
+    void testFindNodeFromPrompt_returnsAssistantResponse() {
+        String prompt = "Find impacted class for Adding Address functionality in Owner";
         when(mockAssistant.chat(anyString(), anyString())).thenReturn("Owner");
         java.util.List<String> result = service.findNodeFromPrompt(testSessionId, prompt);
         assertEquals(java.util.List.of("Owner"), result);
-        verify(mockAssistant, times(1)).chat(anyString(),anyString());
+        verify(mockAssistant, times(1)).chat(anyString(), anyString());
     }
 
     @Test
-    void testFindNodeFromPrompt_returnsMultipleNodes() throws IOException {
+    void testFindNodeFromPrompt_returnsMultipleNodes() {
         String prompt = "Find impacted classes for Adding Address functionality in Owner";
         when(mockAssistant.chat(anyString(), anyString())).thenReturn("Owner, Address");
         java.util.List<String> result = service.findNodeFromPrompt(testSessionId, prompt);
@@ -60,15 +59,15 @@ class PromptAnalysisServiceTest {
     }
 
     @Test
-    void testchatWithAssistant_staticMethod() {
-        when(mockAssistant.chat(anyString(),anyString())).thenReturn("Owner");
+    void testChatWithAssistant_staticMethod() {
+        when(mockAssistant.chat(anyString(), anyString())).thenReturn("Owner");
         java.util.List<String> result = Collections.singletonList(service.chatWithAssistant(testSessionId, "Customer prompt"));
         assertEquals(java.util.List.of("Owner"), result);
         verify(mockAssistant, times(1)).chat(anyString(), anyString());
     }
 
     @Test
-    void testchatWithAssistant_staticMethodMultipleNodes() {
+    void testChatWithAssistant_staticMethodMultipleNodes() {
         when(mockAssistant.chat(anyString(), anyString())).thenReturn("Owner, Address");
         String result = service.chatWithAssistant(testSessionId, "Customer prompt");
         assertEquals("Owner, Address", result);
@@ -83,7 +82,7 @@ class PromptAnalysisServiceTest {
     }
 
     @Test
-    void testGetTestPlan_returnsAssistantResponse() throws IOException {
+    void testGetTestPlan_returnsAssistantResponse() {
         when(mockAssistant.chat(anyString(), anyString())).thenReturn("Generated Test Plan");
         String result = service.getTestPlan(testSessionId, "Adding Address functionality");
         assertEquals("Generated Test Plan", result);
@@ -91,7 +90,7 @@ class PromptAnalysisServiceTest {
     }
 
     @Test
-    void getTestPlanWithImpactedFileJsonReturnsGeneratedTestPlan() throws IOException {
+    void getTestPlanWithImpactedFileJsonReturnsGeneratedTestPlan() {
         when(mockAssistant.chat(anyString(), anyString())).thenReturn("Generated Test Plan");
         var result = service.getTestPlan("Adding Address functionality", "{\"nodes\":[]}");
         assertEquals("Generated Test Plan", result);
