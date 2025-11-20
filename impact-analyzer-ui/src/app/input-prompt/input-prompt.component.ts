@@ -1,9 +1,12 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { Chatservice } from '../services/chatservice';
 import { Sharedservice } from '../services/sharedservice';
+import { GraphResponse } from '../models/graph-response';
+import { Testplan } from '../models/testplan';
+
 import { Message } from '../models/msg';
 
 @Component({
@@ -15,6 +18,8 @@ import { Message } from '../models/msg';
 })
 
 export class InputPromptComponent implements OnInit, AfterViewChecked {
+
+  @Output() messageSent = new EventEmitter<void>();
 
   constructor(private chatService: Chatservice, private sharedservice: Sharedservice) {}
 
@@ -47,19 +52,19 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
       this.newMessage = '';
       this.shouldScrollToBottom = true;
 
-      this.messages.push({ text: 'Understanding the requirement. Analyzing the impacts based on your input. Please wait for graph rendering', sender: 'Mia', timestamp: new Date() });
+      this.messageSent.emit();
+
+      this.messages.push({ text: 'Understanding the requirement. Analyzing the impacts based on your input. Please wait for graph rendering on your right', sender: 'Mia', timestamp: new Date() });
       this.shouldScrollToBottom = true;
     
        this.chatService.getPromptResponse(v)
       .subscribe(response => {
         console.log ("Received response from backend:", response);
-        const graphData = response.graphData; 
-        const promptMessage = response.promptMessage;
+        const graphData = response.graphs; 
         const testPlan  = response.testPlan;
         this.sharedservice.openPanel({ 
-          promptMessage: promptMessage,
-          graphData: graphData,
-          testPlan: testPlan});
+          graphData: graphData as GraphResponse[],
+          testPlan: testPlan.testPlan});
       });
     }    
   }

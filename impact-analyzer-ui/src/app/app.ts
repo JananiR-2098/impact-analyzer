@@ -14,6 +14,13 @@ import { Sharedservice } from './services/sharedservice';
   styleUrl: './app.css'
 })
 export class App {
+
+  chatBoxWidth : number = 300;
+  minChatBoxWidth : number = 200;
+  maxChatBoxWidth : number = 600;
+  autoShrinkWidth : number = 250;
+  
+
   isSidebarOpen = false;
   @ViewChild('rightSidenav') rightSidenav!: MatSidenav;
 
@@ -42,4 +49,11 @@ export class App {
     this.isSidebarOpen = true;
   }
 
+  //Resize chatbox
+  onChatBoxMessageSent() {
+    if(this.chatBoxWidth > this.autoShrinkWidth) {
+      this.chatBoxWidth = this.autoShrinkWidth;
+      console.log('Chatbox resized after message sent');
+    }
+  }
 }
