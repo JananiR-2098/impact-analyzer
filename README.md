@@ -10,6 +10,11 @@ Quick status
 - Dependency aggregation (scan -> LLM -> JSON) is implemented in `com.citi.impactanalyzer.parser.service.DependencyAggregationService` and is invoked at startup by `com.citi.impactanalyzer.parser.init.DependencyAggregationInitializer` by default.
 - The in-memory graph is represented by `com.citi.impactanalyzer.graph.domain.DependencyGraph` and populated by `GraphService.buildGraphFromJson(File)` after the JSON is generated.
 - The HTTP API exposes endpoints under `/graph` (see `GraphTraversalController`).
+- Impact analysis and prompt-based queries are handled by the analyzer package:
+  - `com.citi.impactanalyzer.analyzer.service.PromptAnalysisService` provides core logic for prompt analysis and test plan generation.
+  - `com.citi.impactanalyzer.analyzer.controller.PromptAnalysisController` exposes REST endpoints for impact analysis and test plan generation under `/promptAnalyzer`.
+- The frontend UI is built with Angular and communicates with the backend APIs for graph visualization and impact analysis.
+- AI integration is achieved using LangChain4j and Vertex AI for advanced code analysis and prompt handling.
 
 Quick local setup (for new developers)
 -------------------------------------
@@ -66,16 +71,25 @@ gradlew.bat bootRun --args="--analyzer.dependency-aggregation-enabled=false"
 - If `analyzer.dependency-aggregation-async=true` the app will start while aggregation runs in the background. If false, startup will wait for aggregation to finish.
 
 6) Inspect outputs and use the API
-- Generated JSON (if aggregation ran):
-  - `build/analysis/dependency-graph.json`
-- API example (after app starts):
-  - Request impacted modules (replace `MyService` with a substring you expect):
+- **Generated Outputs:**
+  - Dependency graph JSON: `build/analysis/dependency-graph.json`
+  - NGX graph JSON for Impacted modules: Generated dynamically via the `/promptAnalyzer/impactedModules` endpoint.
 
-```bash
-curl "http://localhost:8080/graph/impactedModules?node=MyService" -H "Accept: application/json"
-```
+- **API Endpoints:**
+  - **Analyze Impacted Modules and Generate Test Plan:**
+    - **Endpoint:** `/promptAnalyzer/impactedModules`
+    - **Method:** `POST`
+    - **Parameters:**
+      - `sessionId` (query param): Unique session identifier.
+      - `prompt` (body): The textual prompt to analyze.
+    - **Response:** JSON object containing impacted modules and test plans.
 
-- If no match found the API returns HTTP 404 with a JSON body like `{ "error": "No matching node found for: MyService" }`.
+- **Example Usage:**
+  ```bash
+  curl -X POST "http://localhost:8080/promptAnalyzer/impactedModules?sessionId=12345" \
+       -H "Content-Type: application/json" \
+       -d '{"prompt": "Analyze the impact of changing ServiceA"}'
+  ```
 
 Troubleshooting
 - If the app fails at the LLM call step:
@@ -95,11 +109,14 @@ Configuration (where to change things)
 
 Where to look in the code
 ---------------------
-- Graph domain and service:
-  - `com.citi.impactanalyzer.graph.domain.DependencyGraph`
-  - `com.citi.impactanalyzer.graph.domain.GraphNode`
+- **Graph Service:**
   - `com.citi.impactanalyzer.graph.service.GraphService`
-  - `com.citi.impactanalyzer.graph.controller.GraphTraversalController`
+    - Provides methods to retrieve impacted modules and manage the dependency graph.
+
+- **Graph Domain:**
+  - `com.citi.impactanalyzer.graph.domain.NgxGraphResponse`
+    - Represents the structure of the graph response, including nodes, links, and test plans.
+
 - Parser / aggregation:
   - `com.citi.impactanalyzer.parser.clone.RepositoryCloneService` (optional, opt-in clone)
   - `com.citi.impactanalyzer.parser.service.CodeFileScannerService` (file discovery & reading)
@@ -108,3 +125,38 @@ Where to look in the code
   - `com.citi.impactanalyzer.parser.service.DependencyAggregationService` (aggregates dependencies & writes JSON)
   - `com.citi.impactanalyzer.parser.service.DependencyExtractionService` (validates and forwards content to LLM/prompt service)
   - `com.citi.impactanalyzer.parser.init.DependencyAggregationInitializer` (startup orchestration)
+
+- Prompt Analyser   
+- **Prompt Analysis Controller:**
+    - `com.citi.impactanalyzer.analyzer.controller.PromptAnalysisController`
+      - Exposes REST API endpoints for analyzing impacted modules and generating test plans.
+      - Coordinates with `PromptAnalysisService` and `GraphService` to process requests.
+
+  **Prompt Analysis Service:**
+    - `com.citi.impactanalyzer.analyzer.service.PromptAnalysisService`
+      - Handles the core logic for analyzing prompts and identifying impacted modules.
+      - Integrates with the dependency graph and test plan generation.
+
+Technologies Used
+----------------
+
+#### Backend
+- **Java**:
+  - Spring Boot for application development.
+  - JUnit and Mockito for testing.
+  - SLF4J for logging.
+  - Jackson for JSON processing.
+  - LangChain4j for AI-related functionalities.
+
+- **Build Tool**:
+  - Gradle for dependency management and build automation.
+
+#### Frontend
+- **Angular**:
+  - Angular framework (version 20.x) for building the user interface.
+  - Angular Material for UI components.
+
+#### Additional Tools and Libraries
+- **AI Integration**:
+  - LangChain4j for embedding models and AI services.
+  - Vertex AI for AI-based analysis.
