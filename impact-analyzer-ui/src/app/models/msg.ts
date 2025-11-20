@@ -1,2 +1,5 @@
-export interface Msg 
-{ role: 'user' | 'assistant'; text: string }
+export interface Message {
+  text: string;
+  sender: 'user' | 'Mia';
+  timestamp: Date;
+}
