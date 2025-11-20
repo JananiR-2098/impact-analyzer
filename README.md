@@ -1,6 +1,100 @@
 Impact Analyzer
 ===============
 
+Overview
+--------
+Impact Analyzer is an intelligent code analysis platform designed to help developers understand the impact of code changes across large, complex codebases. It leverages AI (LLM) to extract dependencies, builds a navigable dependency graph, and provides prompt-driven impact analysis and automated test plan generation. The project features a modern Angular UI for visualization and a robust Spring Boot backend for analysis and orchestration.
+
+Features
+--------
+- **Automated Dependency Extraction:** Scans source code and uses LLMs to extract dependencies, generating a JSON graph.
+- **Impact Analysis:** Accepts natural language prompts to identify impacted modules and generate test plans.
+- **Graph Visualization:** Interactive UI to explore dependencies and impact paths.
+- **Test Plan Generation:** AI-powered generation of test plans for impacted modules.
+- **RESTful API:** Endpoints for impact analysis, graph traversal, and test plan generation.
+- **Pluggable AI Integration:** Supports LangChain4j and Vertex AI for advanced code analysis.
+- **Configurable Cloning:** Can auto-clone target repositories for analysis.
+
+Architecture
+------------
+- **Backend:** Java (Spring Boot), organized into parser, graph, and analyzer modules. Key classes:
+  - `DependencyAggregationService`: Scans and aggregates dependencies.
+  - `GraphService`: Loads and traverses the dependency graph.
+  - `PromptAnalysisService`: Handles prompt-driven analysis and test plan generation.
+  - `PromptAnalysisController`: Exposes REST endpoints.
+- **Frontend:** Angular (v20+), with Material UI, visualizes the dependency graph and interacts with backend APIs.
+- **AI Integration:** LangChain4j and Vertex AI for LLM-based analysis.
+
+Technologies Used
+----------------
+
+#### Backend
+- **Java**:
+  - Spring Boot for application development.
+  - JUnit and Mockito for testing.
+  - SLF4J for logging.
+  - Jackson for JSON processing.
+  - LangChain4j for AI-related functionalities.
+
+- **Build Tool**:
+  - Gradle for dependency management and build automation.
+
+#### Frontend
+- **Angular**:
+  - Angular framework (version 20.x) for building the user interface.
+  - Angular Material for UI components.
+
+#### Additional Tools and Libraries
+- **AI Integration**:
+  - LangChain4j for embedding models and AI services.
+  - Vertex AI for AI-based analysis.
+
+Execution Details
+-----------------
+- **Backend:**
+  - Build: `gradlew.bat build`
+  - Run: `gradlew.bat bootRun`
+  - Main class: `com.citi.impactanalyzer.ImpactAnalyzerApplication`
+- **Frontend:**
+  - Navigate to `impact-analyzer-ui/`
+  - Install dependencies: `npm install`
+  - Run: `ng serve`
+  - Access UI at `http://localhost:4200`
+
+Project Setup
+-------------
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repo-url>
+   cd impact-analyzer
+   ```
+2. **Configure properties:**
+   - Edit `src/main/resources/application.properties` for backend settings.
+   - Key options: LLM provider, repo cloning, aggregation toggles.
+3. **Run backend:**
+   ```bat
+   gradlew.bat build
+   gradlew.bat bootRun
+   ```
+4. **Run frontend:**
+   ```bash
+   cd impact-analyzer-ui
+   npm install
+   ng serve
+   ```
+5. **Access APIs and UI:**
+   - Backend: `http://localhost:8080`
+   - Frontend: `http://localhost:4200`
+
+Evaluation Tips
+---------------
+- Demonstrate impact analysis by posting prompts to `/promptAnalyzer/impactedModules`.
+- Show test plan generation via `/promptAnalyzer/testPlan`.
+- Visualize the dependency graph in the Angular UI.
+- Highlight AI integration and configuration flexibility.
+
+For more details, see the full documentation below.
+
 What this project does
 ----------------------
 Impact Analyzer builds a dependency graph for a codebase by scanning source files, calling an LLM-based analyser to extract dependencies, writing a JSON dependency graph, and loading that JSON into an in-memory graph for traversal and visualization.
@@ -136,27 +230,3 @@ Where to look in the code
     - `com.citi.impactanalyzer.analyzer.service.PromptAnalysisService`
       - Handles the core logic for analyzing prompts and identifying impacted modules.
       - Integrates with the dependency graph and test plan generation.
-
-Technologies Used
-----------------
-
-#### Backend
-- **Java**:
-  - Spring Boot for application development.
-  - JUnit and Mockito for testing.
-  - SLF4J for logging.
-  - Jackson for JSON processing.
-  - LangChain4j for AI-related functionalities.
-
-- **Build Tool**:
-  - Gradle for dependency management and build automation.
-
-#### Frontend
-- **Angular**:
-  - Angular framework (version 20.x) for building the user interface.
-  - Angular Material for UI components.
-
-#### Additional Tools and Libraries
-- **AI Integration**:
-  - LangChain4j for embedding models and AI services.
-  - Vertex AI for AI-based analysis.
