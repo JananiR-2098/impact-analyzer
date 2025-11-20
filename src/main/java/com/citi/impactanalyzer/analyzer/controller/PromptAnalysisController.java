@@ -28,9 +28,9 @@ public class PromptAnalysisController {
     }
 
     @PostMapping("/impactedModules")
-    public ResponseEntity<?> getImpactedModules(@RequestBody String prompt) throws IOException {
+    public ResponseEntity<?> getImpactedModules(@RequestParam String sessionId, @RequestBody String prompt) throws IOException {
         logger.info("Received request to analyze impacted modules for prompt: {}", prompt);
-        List<String> nodes = promptAnalysisService.findNodeFromPrompt(prompt);
+        List<String> nodes = promptAnalysisService.findNodeFromPrompt(sessionId, prompt);
         Object impactedModules = graphService.getImpactedModulesNgx(nodes);
         // If the result is a single NgxGraphResponse, attach test plan
         if (impactedModules instanceof NgxGraphResponse response) {
@@ -39,7 +39,7 @@ public class PromptAnalysisController {
                     .writeValueAsString(impactedModules);
             String testPlan;
             try {
-                testPlan = promptAnalysisService.getTestPlan(impactJson, prompt);
+                testPlan = promptAnalysisService.getTestPlan(impactJson, sessionId, prompt);
             } catch (IOException e) {
                 testPlan = "Error generating test plan: " + e.getMessage();
             }
@@ -71,9 +71,9 @@ public class PromptAnalysisController {
     }
 
     @PostMapping("/testPlan")
-    public ResponseEntity<String> getTestPlan(@RequestBody String prompt) {
+    public ResponseEntity<String> getTestPlan(@RequestParam String sessionId, @RequestBody String prompt) {
         logger.info("Received request to generate test plan for prompt: {}", prompt);
-        String testPlan = promptAnalysisService.getTestPlan(prompt);
+        String testPlan = promptAnalysisService.getTestPlan(sessionId, prompt);
         return ResponseEntity.ok(testPlan);
     }
 }

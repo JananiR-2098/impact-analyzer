@@ -27,7 +27,6 @@ export class Graph implements OnChanges {
       source: l.source,
       target: l.target,
       label: l.label,
-      data: { critical: l.critical }
     }));
   }
 

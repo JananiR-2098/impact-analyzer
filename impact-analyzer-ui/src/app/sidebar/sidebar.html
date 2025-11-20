@@ -8,7 +8,6 @@
     </div>
   </div>
   
-
   <div id="exportSection" class="analysis-body">
     <div class="analysis-outputs">
 
@@ -20,15 +19,16 @@
       <div class="output output-graph">
         <div class="output-title">Graph</div>
         <div class="output-graph graph-wrapper">
-          <app-graph *ngIf="graphData" [graph]="graphData"></app-graph>
+          <div *ngFor="let g of graphData">
+            <app-graph [graph]="g"></app-graph>          
         </div>
+      </div>
       </div>
 
       <div class="output output-testplan">
         <div class="output-title">Test Plan</div>
         <pre class="output-content">{{ testPlan }}</pre>
       </div>
-
     </div>
   </div>
 

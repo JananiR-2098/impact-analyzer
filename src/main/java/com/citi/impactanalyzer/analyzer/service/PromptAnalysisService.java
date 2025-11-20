@@ -50,13 +50,18 @@ public class PromptAnalysisService {
     private String modelName;
 
     private Assistant assistant;
+
     private final EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
     private final EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
+
+
+    // ----------------------------------------------------------------------
+    // Initialization
+    // ----------------------------------------------------------------------
 
     @PostConstruct
     public void init() throws IOException {
         logger.info("Initializing PromptAnalysisService...");
-        this.assistant = createAssistant();
         loadEmbeddingStore();
     }
 
@@ -65,124 +70,147 @@ public class PromptAnalysisService {
 
         File jsonFile = new File(graphJsonPath);
         if (!jsonFile.exists()) {
-            logger.warn("Graph JSON file not found at: {} - skipping embedding store build", graphJsonPath);
+            logger.warn("Graph JSON file not found at: {}. Skipping embedding load.", graphJsonPath);
             return;
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(jsonFile);
+        JsonNode root = new ObjectMapper().readTree(jsonFile);
 
         if (root == null || !root.isArray()) {
-            logger.warn("Invalid JSON format: root is not an array");
+            logger.warn("Invalid graph JSON — expected top-level array.");
             return;
         }
 
         int count = 0;
+
         for (JsonNode node : root) {
             if (!node.has("source")) continue;
 
-            String id = node.get("source").asText();
+            var id = node.path("source").asText(null);
             if (id == null || id.isBlank()) continue;
 
             try {
-                TextSegment textSegment = TextSegment.from(node.toString());
-                Embedding embedding = embeddingModel.embed(node.toString()).content();
-                embeddingStore.add(embedding, textSegment);
+                var text = node.toString();
+                TextSegment segment = TextSegment.from(text);
+                Embedding embedding = embeddingModel.embed(text).content();
+                embeddingStore.add(embedding, segment);
                 count++;
-            } catch (Exception e) {
-                logger.error("Vectorization failed for node: {}", id, e);
+            } catch (Exception ex) {
+                logger.error("Failed vectorizing node with source={}", id, ex);
             }
         }
 
-        logger.info("Successfully vectorized {} nodes into embedding store", count);
-    }
-
-
-    public List<String> findNodeFromPrompt(String userPrompt) {
-        return getResponseFromAssistant(assistant, userPrompt);
+        logger.info("Embedded {} nodes into store", count);
     }
 
     private Assistant createAssistant() {
+        if (assistant != null) return assistant;
+
         logger.info("Creating Assistant...");
 
-        QueryTransformer queryTransformer = new CompressingQueryTransformer(
-                VertexAiGeminiChatModel.builder()
-                        .project(projectId)
-                        .location(location)
-                        .modelName(modelName)
-                        .build()
-        );
+        var chatModel = buildChatModel();
+        var aug = buildRetrievalAugmentor();
 
-        ContentRetriever contentRetriever = EmbeddingStoreContentRetriever.builder()
+        assistant = AiServices.builder(Assistant.class)
+                .chatModel(chatModel)
+                .retrievalAugmentor(aug)
+                .chatMemoryProvider(id -> MessageWindowChatMemory.withMaxMessages(CHAT_MEMORY_SIZE))
+                .build();
+
+        return assistant;
+    }
+
+    private VertexAiGeminiChatModel buildChatModel() {
+        return VertexAiGeminiChatModel.builder()
+                .project(projectId)
+                .location(location)
+                .modelName(modelName)
+                .build();
+    }
+
+    private RetrievalAugmentor buildRetrievalAugmentor() {
+        QueryTransformer transformer = new CompressingQueryTransformer(buildChatModel());
+
+        ContentRetriever retriever = EmbeddingStoreContentRetriever.builder()
                 .embeddingStore(embeddingStore)
                 .embeddingModel(embeddingModel)
                 .maxResults(MAX_RESULTS)
                 .minScore(MIN_SCORE)
                 .build();
 
-        RetrievalAugmentor retrievalAugmentor = DefaultRetrievalAugmentor.builder()
-                .queryTransformer(queryTransformer)
-                .contentRetriever(contentRetriever)
-                .build();
-
-        return AiServices.builder(Assistant.class)
-                .chatModel(VertexAiGeminiChatModel.builder()
-                        .project(projectId)
-                        .location(location)
-                        .modelName(modelName)
-                        .build())
-                .retrievalAugmentor(retrievalAugmentor)
-                .chatMemory(MessageWindowChatMemory.withMaxMessages(CHAT_MEMORY_SIZE))
+        return DefaultRetrievalAugmentor.builder()
+                .queryTransformer(transformer)
+                .contentRetriever(retriever)
                 .build();
     }
 
-    public static List<String> getResponseFromAssistant(Assistant assistant, String userPrompt) {
-        String userQuery = String.format("""
-                You are a JSON code analyzer.
-                Analyze the following user input carefully. %s
-                Identify all relevant impacted class names (comma separated if multiple).
-                Return only the class names as plain text, separated by commas, with no explanation or additional formatting.
-                """, userPrompt);
-
-        String assistantResponse = assistant.chat(userQuery);
+    public List<String> findNodeFromPrompt(String sessionId, String userPrompt) {
+        var prompt = buildImpactAnalysisPrompt(userPrompt);
+        var assistantResponse = chatWithAssistant(sessionId, prompt);
         logger.info("User Query: {}", userPrompt);
         logger.info("Assistant Response: {}", assistantResponse);
+        return extractClassList(assistantResponse);
+    }
+
+    public String getTestPlan(String sessionId, String prompt) {
+        var query = "Analyze and provide test plan for: " + prompt;
+        return chatWithAssistant(sessionId, query);
+    }
+
+    public String getTestPlan(String changeRequest, String sessionId, String impactedFileJson) throws IOException {
+        var prompt = buildTestPlanPrompt(changeRequest, impactedFileJson);
+        return chatWithAssistant(sessionId, prompt);
+    }
+
+    private String buildImpactAnalysisPrompt(String userPrompt) {
+        return """
+            You are an expert software architect and impact analyst.
+            
+            You will receive:
+            1. A JSON object representing a Java project structure.
+            2. A user query describing a change request.
+            
+            Your task:
+            - Analyze the JSON structure.
+            - Understand the user request: '%s'
+            - Return ALL impacted class names (comma-separated).
+            - DO NOT invent class names.
+            - Exclude test classes.
+            - Return ONLY the class names, no explanation.
+            """.formatted(userPrompt);
+    }
+
+    private String buildTestPlanPrompt(String changeRequest, String impactedFileJson) {
+        return """
+            You are a software test plan generator.
+            You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
+            Analyse the repository structure, functionality, public methods, and potential risks.
+    
+            Your task:
+            - Generate a complete TEST PLAN for the impacted files in the JSON.
+            - Include the following sections in the test plan:
+            - Test scenarios based on code functionality given in the JSON.
+            - Integration test plan based on other controller interactions
+    
+            Here is the repository JSON for the impacted files: %s
+            Here are the changes the developer wants to make to the code %s";
+            """.formatted(impactedFileJson, changeRequest);
+    }
+
+    private List<String> extractClassList(String response) {
         List<String> nodes = new ArrayList<>();
-        if (assistantResponse != null && !assistantResponse.isBlank()) {
-            for (String part : assistantResponse.split(",")) {
-                String node = part.trim();
-                if (!node.isEmpty()) {
-                    nodes.add(node);
-                }
-            }
+        if (response == null || response.isBlank()) return nodes;
+
+        for (String entry : response.split(",")) {
+            var trimmed = entry.trim();
+            if (!trimmed.isEmpty()) nodes.add(trimmed);
         }
         return nodes;
     }
 
-    public String getTestPlan(String prompt) {
-        String userQuery = "Analyze and provide test plan for: " + prompt;
-        String answer = assistant.chat(userQuery);
-        logger.info("User Query: {}", userQuery);
-        logger.info("Assistant Response: {}", answer);
-        return answer;
-    }
-
-    public String getTestPlan(String query, String impactedFileJson) throws IOException {
-        var prompt = """
-                You are a software test plan generator.
-                You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
-                Analyse the repository structure, functionality, public methods, and potential risks.
-                
-                Your task:
-                - Generate a complete TEST PLAN for the impacted files in the JSON.
-                - Include the following sections in the test plan:
-                - Test scenarios based on code functionality given in the JSON.
-                - Integration test plan based on other controller interactions
-                
-                Here is the repository JSON for the impacted files:
-                """ + impactedFileJson + " Here are the changes the developer wants to make to the code " + query;
-        var answer = assistant.chat(prompt);
-        logger.info("Assistant Response for Test Plan: {}", answer);
-        return answer;
+    public String chatWithAssistant(String sessionId, String message) {
+        var reply = createAssistant().chat(sessionId, message).trim();
+        int echoIndex = reply.lastIndexOf(message);
+        return (echoIndex > 0) ? reply.substring(echoIndex).trim() : reply;
     }
 }
