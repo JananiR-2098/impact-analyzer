@@ -16,7 +16,7 @@ export class Sharedservice {
     this.panelDataSource.next(msg);
   }
 
-  openPanel(data: { promptMessage: string, graphData: GraphResponse , testPlan: string}) {
+  openPanel(data: { graphData: GraphResponse[] , testPlan: string}) {
     console.log("Shared Service - Opening panel with data:", data);
     this.panelDataSource.next(data);
   }

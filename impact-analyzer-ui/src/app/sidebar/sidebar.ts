@@ -20,7 +20,7 @@ import jsPDF from 'jspdf';
 export class SidebarComponent  {
   promptMessage: string = '';
   testPlan: string = '';
-  graphData: GraphResponse | null = null;
+  graphData: GraphResponse[] = [];
   panelData: any = null;
 
   constructor(private sharedservice: Sharedservice) {}
@@ -28,9 +28,8 @@ export class SidebarComponent  {
   ngOnInit() {
     this.sharedservice.panelData$.subscribe(data => {
       if(data){
-        this.promptMessage = data.promptMessage ; 
         this.testPlan = data.testPlan ;
-        this.graphData = data.graphData;
+        this.graphData = data.graphData as GraphResponse[];
         console.log("Received panel data:", data);
         console.log("GRAPH:", this.graphData);
       }

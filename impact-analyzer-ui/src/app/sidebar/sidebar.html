@@ -7,7 +7,9 @@
  </div>
   <div class="graph-wrapper">
     <h3>Graph</h3>
-    <app-graph *ngIf="graphData" [graph]="graphData"></app-graph>
+    <div *ngFor="let g of graphData">
+         <app-graph [graph]="g"></app-graph>
+    </div>
   </div>
 
   <div class="testplan">

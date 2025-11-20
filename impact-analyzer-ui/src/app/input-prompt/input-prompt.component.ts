@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Chatservice } from '../services/chatservice';
 import { Sharedservice } from '../services/sharedservice';
 import { Msg } from '../models/msg';
+import { GraphResponse } from '../models/graph-response';
+import { Testplan } from '../models/testplan';
 
 @Component({
   selector: 'app-input-prompt',
@@ -30,14 +32,12 @@ export class InputPromptComponent {
     this.chatService.getPromptResponse(v)
       .subscribe(response => {
         console.log ("Received response from backend:", response);
-        const graphData = response.graphData; 
-        const promptMessage = response.promptMessage;
+        const graphData = response.graphs; 
         const testPlan  = response.testPlan;
         this.sharedservice.openPanel({ 
-          promptMessage: promptMessage,
-          graphData: graphData,
-          testPlan: testPlan});
-      });
+          graphData: graphData as GraphResponse[],
+          testPlan: testPlan.testPlan});
+      }); 
   }
 
   onKeydown(ev: KeyboardEvent) {
