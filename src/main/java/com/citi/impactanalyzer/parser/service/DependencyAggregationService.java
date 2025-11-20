@@ -25,15 +25,18 @@ public class DependencyAggregationService {
     private final CodeFileScannerService fileScanner;
     private final ObjectMapper mapper;
     private final DependencyAnalyzerProperties properties;
+    private final BasePackageDetectorService basePackageDetector;
 
     public DependencyAggregationService(DependencyExtractionService dependencyService,
                                         CodeFileScannerService fileScanner,
                                         ObjectMapper mapper,
-                                        DependencyAnalyzerProperties properties) {
+                                        DependencyAnalyzerProperties properties,
+                                        BasePackageDetectorService basePackageDetector) {
         this.dependencyService = dependencyService;
         this.fileScanner = fileScanner;
         this.mapper = mapper;
         this.properties = properties;
+        this.basePackageDetector = basePackageDetector;
     }
 
     public void generateDependencyGraph() {
@@ -57,7 +60,6 @@ public class DependencyAggregationService {
                 }
             }
 
-
             Map<String, String> paths = properties.getPaths();
             if (paths != null && paths.containsKey("sql")) {
                 String sqlPath = paths.get("sql");
@@ -66,11 +68,24 @@ public class DependencyAggregationService {
                 allFiles.addAll(fileScanner.scanDirectory(sqlDir));
             }
 
-
             if (allFiles.isEmpty()) {
                 logger.warn("No files found in language-specific folders. Scanning entire repo...");
                 Path rootDir = Path.of(baseDir);
                 allFiles = fileScanner.scanDirectory(rootDir);
+            }
+
+            String configuredBasePackage = properties.getBasePackage();
+            if (configuredBasePackage == null || configuredBasePackage.isBlank()) {
+                logger.info("Base package not configured. Auto-detecting from scanned files...");
+                String detectedPackage = basePackageDetector.detectBasePackage(allFiles);
+                if (detectedPackage != null && !detectedPackage.isBlank()) {
+                    logger.info("Auto-detected base package: {}", detectedPackage);
+                    properties.setBasePackage(detectedPackage);
+                } else {
+                    logger.warn("Could not auto-detect base package. Using all packages.");
+                }
+            } else {
+                logger.info("Using configured base package: {}", configuredBasePackage);
             }
 
             processFiles(allFiles);
@@ -88,16 +103,22 @@ public class DependencyAggregationService {
     private void processFiles(List<CodeFile> codeFiles) throws Exception {
         List<Object> allDependencies = new ArrayList<>();
 
+        logger.info("Starting to process {} files for dependency analysis", codeFiles.size());
+        int processedCount = 0;
+        int skippedCount = 0;
+
         for (CodeFile file : codeFiles) {
             logger.debug("Processing: {} language: {}", file, file.getLanguage());
 
             if (file.getType() == Type.CODE && !properties.getLanguages().contains(file.getLanguage())) {
                 logger.debug("Skipping unsupported language: {}", file.getLanguage());
+                skippedCount++;
                 continue;
             }
 
             if (file.getType() == Type.SQL && !properties.getSqlDialects().contains(file.getDialect())) {
                 logger.debug("Skipping unsupported SQL dialect: {}", file.getDialect());
+                skippedCount++;
                 continue;
             }
 
@@ -111,9 +132,16 @@ public class DependencyAggregationService {
             String depsJson = sanitizeLlmOutput(rawOutput);
             List<Object> dependencies = mapper.readValue(depsJson, new TypeReference<>() {
             });
-            logger.debug("dependencies: {}", dependencies);
+
+            logger.info("File processed - found {} dependencies. Content length: {} chars", dependencies.size(),
+                    file.getContent() != null ? file.getContent().length() : 0);
+
             allDependencies.addAll(dependencies);
+            processedCount++;
         }
+
+        logger.info("File processing complete. Processed: {}, Skipped: {}, Total dependencies: {}",
+                processedCount, skippedCount, allDependencies.size());
 
         File output = new File("build/analysis/dependency-graph.json");
         File parent = output.getParentFile();
