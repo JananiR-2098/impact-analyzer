@@ -1,9 +1,36 @@
-<ngx-graph 
-  class="chart"
+<ngx-graph
   [nodes]="nodes"
   [links]="links"
-  [autoCenter]="true"
-  [autoZoom]="true"
+  [curve]="curve"
+  layout="dagreCluster"
   (nodeClick)="onNodeClick($event)"
-  (linkClick)="onLinkClick($event)">
+  (linkClick)="onLinkClick($event)"
+  class="graph-container">
+
+  <svg>
+    <defs>
+      <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z"></path>
+      </marker>
+    </defs>
+  </svg>
+
+  <!-- Node Template -->
+  <ng-template ngx-graph-node let-node>
+    <div class="node-box">
+      {{ node.label }}
+    </div>
+  </ng-template>
+
+  <!-- Link Template -->
+  <ng-template ngx-graph-link let-link>
+    <svg:g>
+      <svg:path
+        [attr.stroke]="link.data.critical ? 'red' : '#555'"
+        [attr.stroke-width]="link.data.width"
+        marker-end="url(#arrow)" />
+      <text>{{ link.label }}</text>
+    </svg:g>
+  </ng-template>
+
 </ngx-graph>

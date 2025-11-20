@@ -1,4 +1,5 @@
 <div class="analysis-container">
+
   <div class="analysis-header">
     <div class="analysis-title">Analysis</div>
     <div class="analysis-actions">
@@ -11,23 +12,21 @@
   <div id="exportSection" class="analysis-body">
     <div class="analysis-outputs">
 
-      <div class="output output-prompt">
-        <div class="output-title">Prompt</div>
-        <pre class="output-content">{{ promptMessage }}</pre>
-      </div>
-
       <div class="output output-graph">
         <div class="output-title">Graph</div>
-        <div class="output-graph graph-wrapper">
-          <div *ngFor="let g of graphData">
-            <app-graph [graph]="g"></app-graph>          
+          <div *ngIf="graphData && graphData.length > 1">
+            <button mat-raised-button *ngFor="let g of graphData; let i = index" (click)="selectedGraph = g">
+             Graph {{ i + 1 }}
+            </button>
+          </div>
+        <div class="output-graph graph-wrapper" *ngIf="selectedGraph">
+          <app-graph [graph]="selectedGraph"></app-graph>
         </div>
-      </div>
       </div>
 
       <div class="output output-testplan">
         <div class="output-title">Test Plan</div>
-        <pre class="output-content">{{ testPlan }}</pre>
+        <div class="output-content" [innerHTML]="testPlanHtml"></div>
       </div>
     </div>
   </div>
