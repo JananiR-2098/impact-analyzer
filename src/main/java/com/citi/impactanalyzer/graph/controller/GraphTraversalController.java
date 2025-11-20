@@ -8,9 +8,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-@CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/promptAnalyzer")
+@RequestMapping("/graph")
 public class GraphTraversalController {
 
     private final GraphService graphService;
