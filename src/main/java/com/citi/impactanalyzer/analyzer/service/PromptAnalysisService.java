@@ -86,11 +86,11 @@ public class PromptAnalysisService {
         for (JsonNode node : root) {
             if (!node.has("source")) continue;
 
-            String id = node.path("source").asText(null);
+            var id = node.path("source").asText(null);
             if (id == null || id.isBlank()) continue;
 
             try {
-                String text = node.toString();
+                var text = node.toString();
                 TextSegment segment = TextSegment.from(text);
                 Embedding embedding = embeddingModel.embed(text).content();
                 embeddingStore.add(embedding, segment);
@@ -145,21 +145,21 @@ public class PromptAnalysisService {
     }
 
     public List<String> findNodeFromPrompt(String sessionId, String userPrompt) {
-        String prompt = buildImpactAnalysisPrompt(userPrompt);
-        String assistantResponse = chat(sessionId, prompt);
+        var prompt = buildImpactAnalysisPrompt(userPrompt);
+        var assistantResponse = chatWithAssistant(sessionId, prompt);
         logger.info("User Query: {}", userPrompt);
         logger.info("Assistant Response: {}", assistantResponse);
         return extractClassList(assistantResponse);
     }
 
     public String getTestPlan(String sessionId, String prompt) {
-        String query = "Analyze and provide test plan for: " + prompt;
-        return chat(sessionId, query);
+        var query = "Analyze and provide test plan for: " + prompt;
+        return chatWithAssistant(sessionId, query);
     }
 
     public String getTestPlan(String changeRequest, String sessionId, String impactedFileJson) throws IOException {
-        String prompt = buildTestPlanPrompt(changeRequest, impactedFileJson);
-        return chat(sessionId, prompt);
+        var prompt = buildTestPlanPrompt(changeRequest, impactedFileJson);
+        return chatWithAssistant(sessionId, prompt);
     }
 
     private String buildImpactAnalysisPrompt(String userPrompt) {
@@ -197,21 +197,19 @@ public class PromptAnalysisService {
             """.formatted(impactedFileJson, changeRequest);
     }
 
-
     private List<String> extractClassList(String response) {
         List<String> nodes = new ArrayList<>();
         if (response == null || response.isBlank()) return nodes;
 
         for (String entry : response.split(",")) {
-            String trimmed = entry.trim();
+            var trimmed = entry.trim();
             if (!trimmed.isEmpty()) nodes.add(trimmed);
         }
         return nodes;
     }
 
-
-    public String chat(String sessionId, String message) {
-        String reply = createAssistant().chat(sessionId, message).trim();
+    public String chatWithAssistant(String sessionId, String message) {
+        var reply = createAssistant().chat(sessionId, message).trim();
         int echoIndex = reply.lastIndexOf(message);
         return (echoIndex > 0) ? reply.substring(echoIndex).trim() : reply;
     }
