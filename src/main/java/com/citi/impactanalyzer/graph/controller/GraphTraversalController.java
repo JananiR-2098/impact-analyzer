@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/graph")
+@RequestMapping("/promptAnalyzer")
 public class GraphTraversalController {
 
     private final GraphService graphService;
