@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 import { Chatservice } from '../services/chatservice';
 import { Sharedservice } from '../services/sharedservice';
 import { Message } from '../models/msg';
@@ -8,7 +9,7 @@ import { Message } from '../models/msg';
 @Component({
   selector: 'app-input-prompt',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './input-prompt.component.html',
   styleUrls: ['./input-prompt.component.css'],
 })

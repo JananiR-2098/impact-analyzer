@@ -20,8 +20,11 @@
         <input type="text" 
             [(ngModel)]="newMessage"
             (keyup.enter)="sendMessage()"
-            placeholder="Type your message..." 
+            placeholder="Share your requirement..." 
             class="chat-input">
-        <button (click)="sendMessage()" class="send-button">Send</button>
+        <button mat-icon-button color="primary" (click)="sendMessage()" aria-label="Send Message"> 
+            <mat-icon>send</mat-icon>
+        </button>
     </div>
+    s
 </div>
