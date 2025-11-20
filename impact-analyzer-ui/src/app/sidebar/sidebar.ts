@@ -1,4 +1,5 @@
 import { Component,OnInit, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { marked } from 'marked';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,19 +21,34 @@ import jsPDF from 'jspdf';
 export class SidebarComponent  {
   promptMessage: string = '';
   testPlan: string = '';
-  graphData: GraphResponse | null = null;
+  graphData: GraphResponse[] = [];
   panelData: any = null;
+  selectedGraph!: GraphResponse;
+
+  testPlanHtml: string = '';
 
   constructor(private sharedservice: Sharedservice) {}
 
   ngOnInit() {
     this.sharedservice.panelData$.subscribe(data => {
       if(data){
-        this.promptMessage = data.promptMessage ; 
         this.testPlan = data.testPlan ;
         this.graphData = data.graphData;
+        if (this.graphData && this.graphData.length > 0) {
+          this.selectedGraph = this.graphData[0];
+        }
+        // Convert markdown to HTML (handle both sync and async)
+        const parsed = marked.parse(this.testPlan || '');
+        if (parsed instanceof Promise) {
+          parsed.then((html: string) => {
+            this.testPlanHtml = html;
+          });
+        } else {
+          this.testPlanHtml = parsed as string;
+        }
         console.log("Received panel data:", data);
         console.log("GRAPH:", this.graphData);
+        console.log("GRAPH:", this.selectedGraph);
       }
     });
   }

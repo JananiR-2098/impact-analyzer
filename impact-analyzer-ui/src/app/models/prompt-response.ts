@@ -1,8 +1,7 @@
 import { GraphResponse } from "./graph-response";
+import { Testplan } from "./testplan";
 
 export interface PromptResponse {
-  graphResponse: any;
-  promptMessage: string;
-  graphData: GraphResponse;
-  testPlan: string;
+  graphs: GraphResponse[];
+  testPlan: Testplan;
 }
