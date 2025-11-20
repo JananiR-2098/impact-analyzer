@@ -1,5 +1,7 @@
 package com.citi.impactanalyzer.graph.service;
 
+import com.citi.impactanalyzer.graph.domain.NgxGraphResponse;
+import com.citi.impactanalyzer.graph.domain.NgxGraphMultiResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.citi.impactanalyzer.graph.domain.DependencyGraph;
@@ -13,6 +15,7 @@ import com.citi.impactanalyzer.vectorstore.InMemoryVectorStore;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -59,7 +62,6 @@ public class GraphService {
     public void init() throws Exception {
         logger.info("GraphService init...");
 
-        // Trigger dependency aggregation from here if enabled in properties
         if (analyzerProperties.isDependencyAggregationEnabled()) {
             logger.info("Dependency aggregation is enabled - invoking aggregation from GraphService");
             try {
@@ -95,7 +97,7 @@ public class GraphService {
         logger.info("Finished building graph; nodeCount={}", graph.getAllNodes().size());
     }
 
-    public void buildGraphFromJson(JsonNode root)  {
+    public void buildGraphFromJson(JsonNode root) {
         if (root == null) {
             logger.warn("Parsed JSON root is null");
             return;
@@ -208,5 +210,49 @@ public class GraphService {
         int idx = fqName.indexOf('.');
         if (idx < 0) return fqName;
         return fqName.substring(0, idx);
+    }
+
+    public Object getImpactedModulesNgx(List<String> nodes) {
+        if (nodes == null || nodes.isEmpty() || nodes.stream().allMatch(s -> s == null || s.isBlank())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "nodes parameter is required"));
+        }
+
+        DependencyGraph graph = getGraph();
+        Set<String> processed = new HashSet<>();
+        List<NgxGraphResponse> graphs = new ArrayList<>();
+        for (String node : nodes) {
+            if (node != null && !node.isBlank()) {
+                Set<String> visited = new HashSet<>();
+                List<NgxGraphResponse.NgxLink> links = new ArrayList<>();
+                Set<GraphNode> startNodes = graph.findNodes(node);
+                for (GraphNode start : startNodes) {
+                    buildNgxLinks(start, visited, links, graph);
+                }
+                Set<String> newNodes = new HashSet<>(visited);
+                newNodes.removeAll(processed);
+                if (!newNodes.isEmpty()) {
+                    List<NgxGraphResponse.NgxNode> resultNodes = newNodes.stream()
+                            .map(NgxGraphResponse.NgxNode::new)
+                            .toList();
+                    graphs.add(new NgxGraphResponse(resultNodes, links, List.of()));
+                    processed.addAll(newNodes);
+                }
+            }
+        }
+        if (graphs.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "No matching nodes found for: " + nodes));
+        }
+        return new NgxGraphMultiResponse(graphs);
+    }
+
+    private void buildNgxLinks(GraphNode node, Set<String> visited, List<NgxGraphResponse.NgxLink> links, DependencyGraph graph) {
+        if (node == null || visited.contains(node.getName())) return;
+        visited.add(node.getName());
+        for (GraphNode dep : node.getDependencies()) {
+            EdgeMetadata meta = graph.getEdgeMetadata(node.getName(), dep.getName());
+            boolean critical = meta != null && meta.isCritical();
+            links.add(new NgxGraphResponse.NgxLink(node.getName(), dep.getName(), "depends", critical));
+            buildNgxLinks(dep, visited, links, graph);
+        }
     }
 }

@@ -1,9 +1,38 @@
-<h3>Messages</h3>
+<div class="analysis-container">
+  <div class="analysis-header">
+    <div class="analysis-title">Analysis
+      <button mat-icon-button color="primary" (click)="exportPDF()" aria-label="Download PDF">
+        <mat-icon>download</mat-icon>
+      </button>
+      </div>
+    </div>
+  
 
-<div *ngFor="let m of messages">
-  <b>{{ m.role }}:</b> {{ m.text }}
+  <div id="exportSection" class="analysis-body"> <!-- PDF Target -->
+    <div class="analysis-outputs">
+
+      <div class="output output-prompt">
+        <div class="output-title">Prompt</div>
+        <pre class="output-content">{{ promptMessage }}</pre>
+      </div>
+
+      <div class="output output-graph">
+        <div class="output-title">Graph</div>
+        <div class="output-graph graph-wrapper">
+          <app-graph *ngIf="graphData" [graph]="graphData"></app-graph>
+        </div>
+      </div>
+
+      <div class="output output-testplan">
+        <div class="output-title">Test Plan</div>
+        <pre class="output-content">{{ testPlan }}</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="chat-footer">
+    <!-- reserved for actions (e.g., close, clear) -->
+  </div>
+
 </div>
-
-<br>
-
-<button mat-button color="primary">Close</button>
