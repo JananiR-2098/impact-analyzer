@@ -159,7 +159,9 @@ public class PromptAnalysisService {
 
     public String getTestPlan(String changeRequest, String sessionId, String impactedFileJson) throws IOException {
         String prompt = buildTestPlanPrompt(changeRequest, impactedFileJson);
-        return chat(sessionId, prompt);
+        String assistantResponse = chat(sessionId, prompt);
+        logger.info("Assistant Response for test Plan: {}", assistantResponse);
+        return assistantResponse;
     }
 
     private String buildImpactAnalysisPrompt(String userPrompt) {
@@ -188,13 +190,9 @@ public class PromptAnalysisService {
     
             Your task:
             - Generate a complete TEST PLAN for the impacted files in the JSON.
-            - Include the following sections in the test plan:
-            - Test scenarios based on code functionality given in the JSON.
-            - Integration test plan based on other controller interactions
-    
-            Here is the repository JSON for the impacted files: %s
+            - The test plan should include unit tests, integration tests, and system tests.
             Here are the changes the developer wants to make to the code %s";
-            """.formatted(impactedFileJson, changeRequest);
+            """.formatted(changeRequest);
     }
 
 
