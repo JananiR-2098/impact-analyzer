@@ -1,4 +1,4 @@
-import { Component,OnInit, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { marked } from 'marked';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -18,7 +18,7 @@ import jsPDF from 'jspdf';
   styleUrls: ['./sidebar.css']
 })
 
-export class SidebarComponent  {
+export class SidebarComponent implements OnInit {
   promptMessage: string = '';
   testPlan: string = '';
   graphData: GraphResponse[] = [];
@@ -27,7 +27,7 @@ export class SidebarComponent  {
 
   testPlanHtml: string = '';
 
-  constructor(private sharedservice: Sharedservice) {}
+  constructor(private readonly sharedservice: Sharedservice) {}
 
   ngOnInit() {
     this.sharedservice.panelData$.subscribe(data => {
@@ -43,8 +43,6 @@ export class SidebarComponent  {
           parsed.then((html: string) => {
             this.testPlanHtml = html;
           });
-        } else {
-          this.testPlanHtml = parsed as string;
         }
         console.log("Received panel data:", data);
         console.log("GRAPH:", this.graphData);
@@ -54,42 +52,47 @@ export class SidebarComponent  {
   }
 
   async exportPDF() {
-    const element = document.getElementById('exportSection');
+  const element = document.getElementById('exportSection');
 
-    if (!element) {
-      console.error("PDF element not found");
-      return;
-    }
+  if (!element) {
+    console.error("PDF element not found");
+    return;
+  }
 
-    await new Promise(res => setTimeout(res, 200));
+  // wait for DOM to settle (important for graphs/markdown)
+  await new Promise(res => setTimeout(res, 200));
 
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      logging: false
-    });
+  // --- FIX: Capture full scrollable content ---
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    scrollY: -window.scrollY,
+    windowWidth: element.scrollWidth,
+    windowHeight: element.scrollHeight,
+    logging: false
+  });
 
-    const imgData = canvas.toDataURL('image/png');
+  const imgData = canvas.toDataURL('image/png');
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210;
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const imgWidth = 210;
+  const pageHeight = 295;
 
-    const pageHeight = 295;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    let heightLeft = imgHeight;
-    let position = 0;
+  let heightLeft = imgHeight;
+  let position = 0;
 
+  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
     heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    pdf.save('impact-analysis-document.pdf');
   }
+
+  pdf.save('impact-analysis-document.pdf');
+}
 }
