@@ -1,27 +1,47 @@
 <div class="analysis-container">
-  <div class="analysis-header">
-    <div class="analysis-title">Analysis
-      <button mat-icon-button color="primary" (click)="exportPDF()" aria-label="Download PDF">
-        <mat-icon>download</mat-icon>
-      </button>
-      </div>
-    </div>
-  
+<div class="analysis-header">
+<div class="analysis-title">Analysis
+<button mat-icon-button color="primary" (click)="exportPDF()" aria-label="Download PDF">
+<mat-icon>download</mat-icon>
+</button>
+</div>
+</div>
 
-<div id="exportSection"> <!-- PDF Target -->
-  <div class="testplan">
-    <h3>Prompt Message</h3>
-    <pre>{{ promptMessage }}</pre>  
- </div>
-  <div class="graph-wrapper">
-    <h3>Graph</h3>
-    <div *ngFor="let g of graphData">
-         <app-graph [graph]="g"></app-graph>
-    </div>
-  </div>
 
-  <div class="chat-footer">
-    <!-- reserved for actions (e.g., close, clear) -->
-  </div>
+<div id="exportSection" class="analysis-body">
+<div class="analysis-outputs">
 
+
+<div class="output output-graph">
+<div class="output-title">Graph</div>
+
+
+<div *ngIf="graphData && graphData.length > 1">
+<button mat-raised-button
+*ngFor="let g of graphData; let i = index"
+(click)="selectedGraph = g">
+Graph {{ i + 1 }}
+</button>
+</div>
+
+
+<div class="graph-wrapper" *ngIf="selectedGraph">
+<app-graph [graph]="selectedGraph"></app-graph>
+</div>
+</div>
+
+
+<div class="output output-testplan">
+<div class="output-title">Test Plan</div>
+<pre class="output-content">{{ testPlan }}</pre>
+</div>
+
+
+</div>
+</div>
+
+
+<div class="chat-footer">
+<!-- reserved for actions -->
+</div>
 </div>

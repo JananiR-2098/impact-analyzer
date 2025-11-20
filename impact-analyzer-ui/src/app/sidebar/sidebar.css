@@ -1,55 +1,60 @@
 :host {
   display: block;
-  padding: 20px;
-}
-
-h3 {
-  margin-top: 0;
+  padding: 0;
 }
 
 .analysis-container {
   display: flex;
   flex-direction: column;
   position: fixed;
-    right: 10px;
-    top: 10vh;
-    width: 48vw;
-    height: 90vh;  
+  right: 10px;
+  top: 10vh;
+  width: 48vw;
+  height: 90vh;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  overflow: hidden;
 }
 
 .analysis-header {
-   padding: 15px 20px;
-   background: linear-gradient(90deg, #63b9d8, #676f6c 40%);
-   border-bottom: 1px solid #e0e0e0;
-   color: #333;
-   font-size: 1.1em;
-   font-weight: bold;
+  padding: 15px 20px;
+  background: linear-gradient(90deg, #63b9d8, #676f6c 40%);
+  border-bottom: 1px solid #e0e0e0;
+  color: white;
+  font-size: 1.1em;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .analysis-title {
   font-size: 0.95rem;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .analysis-body {
   padding: 12px 16px;
   overflow-y: auto;
   flex: 1 1 auto;
-  background: #fff;
+  background: #fafafa;
 }
 
 .analysis-outputs {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .output {
-  max-width: 100%;
-  background: #f3f3f3;
+  background: #ffffff;
   border-radius: 12px;
-  padding: 10px 12px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
 .output-title {
@@ -62,6 +67,8 @@ h3 {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
+  font-family: monospace;
+  font-size: 0.85rem;
 }
 
 .output-graph .graph-wrapper {
@@ -80,9 +87,4 @@ h3 {
   border-top: 1px solid rgba(0,0,0,0.06);
   padding: 8px 12px;
   background: #fafafa;
-}
-
-/* Adjustments for the existing host padding */
-:host {
-  padding: 0;
 }

@@ -22,6 +22,7 @@ export class SidebarComponent  {
   testPlan: string = '';
   graphData: GraphResponse[] = [];
   panelData: any = null;
+  selectedGraph!: GraphResponse;
 
   constructor(private sharedservice: Sharedservice) {}
 
@@ -29,9 +30,14 @@ export class SidebarComponent  {
     this.sharedservice.panelData$.subscribe(data => {
       if(data){
         this.testPlan = data.testPlan ;
-        this.graphData = data.graphData as GraphResponse[];
+        this.graphData = data.graphData;
+        if (this.graphData && this.graphData.length > 0) {
+          this.selectedGraph = this.graphData[0];
+        }  
         console.log("Received panel data:", data);
         console.log("GRAPH:", this.graphData);
+        console.log("GRAPH:", this.selectedGraph);
+
       }
     });
   }
