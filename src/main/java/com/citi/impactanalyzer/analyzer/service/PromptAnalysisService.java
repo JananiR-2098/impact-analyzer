@@ -175,7 +175,7 @@ public class PromptAnalysisService {
             - Understand the user request: '%s'
             - DO NOT invent class names.
             - Exclude test classes.
-            - Return only the class names(present in JSON) as plain text, separated by commas, with no explanation or additional formatting.
+            - Return only the class names(present in JSON also exclude package name) as plain text, separated by commas, with no explanation or additional formatting.
             """.formatted(userPrompt);
     }
 
