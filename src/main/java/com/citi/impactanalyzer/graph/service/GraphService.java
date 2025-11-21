@@ -108,33 +108,55 @@ public class GraphService {
             return;
         }
 
-        String[] fields = {"calls", "reads", "writes", "extends", "implements", "uses_type"};
+        logger.info("Processing {} dependency entries from JSON", root.size());
+        Set<String> uniqueSources = new HashSet<>();
+        int totalDependencies = 0;
 
         for (JsonNode node : root) {
-            if (node == null || !node.has("source")) {
-                logger.debug("Skipping JSON node without 'source' field: {}", node);
-                continue;
-            }
+            if (node == null) continue;
 
-            String source = node.get("source").asText();
-            if (source == null || source.isBlank()) {
-                logger.debug("Skipping JSON node with empty 'source': {}", node);
-                continue;
-            }
+            if (node.has("source") && node.has("relation") && node.has("target")) {
+                String source = node.get("source").asText();
+                String relation = node.get("relation").asText();
+                String target = node.get("target").asText();
 
-            for (String field : fields) {
-                if (!node.has(field) || node.get(field) == null || !node.get(field).isArray())
-                    continue;
-
-                for (JsonNode t : node.get(field)) {
-                    if (t == null || t.isNull()) continue;
-                    String target = t.asText();
-                    if (target == null || target.isBlank()) continue;
-
+                if (source != null && !source.isBlank() && target != null && !target.isBlank()) {
+                    uniqueSources.add(source);
                     graph.addDependency(source, target);
+                    totalDependencies++;
+                    logger.debug("Added dependency: {} --[{}]--> {}", source, relation, target);
+                }
+                continue;
+            }
+
+            if (node.has("source")) {
+                String source = node.get("source").asText();
+                if (source == null || source.isBlank()) {
+                    logger.debug("Skipping JSON node with empty 'source'");
+                    continue;
+                }
+
+                uniqueSources.add(source);
+                String[] fields = {"CALLS", "READS", "WRITES", "IMPLEMENTS", "EXTENDS", "USES_TYPE", "ANNOTATED_WITH", "THROWS", "CALLS_CONSTRUCTOR", "IMPORTS", "DEPENDS_ON_PACKAGE"};
+
+                for (String field : fields) {
+                    if (!node.has(field) || node.get(field) == null || !node.get(field).isArray())
+                        continue;
+
+                    for (JsonNode t : node.get(field)) {
+                        if (t == null || t.isNull()) continue;
+                        String target = t.asText();
+                        if (target == null || target.isBlank()) continue;
+
+                        graph.addDependency(source, target);
+                        totalDependencies++;
+                        logger.debug("Added dependency: {} --[{}]--> {}", source, field, target);
+                    }
                 }
             }
         }
+
+        logger.info("Finished building graph from JSON. Unique sources: {}, Total dependencies added: {}", uniqueSources.size(), totalDependencies);
     }
 
     public void vectorizeGraphNodes(JsonNode root) {
@@ -212,7 +234,7 @@ public class GraphService {
         return fqName.substring(0, idx);
     }
 
-    public Object getImpactedModulesNgx(List<String> nodes) {
+    public Object getImpactedModulesNgx(List<String> nodes, String testPlan) {
         if (nodes == null || nodes.isEmpty() || nodes.stream().allMatch(s -> s == null || s.isBlank())) {
             return ResponseEntity.badRequest().body(Map.of("error", "nodes parameter is required"));
         }
@@ -232,9 +254,9 @@ public class GraphService {
                 newNodes.removeAll(processed);
                 if (!newNodes.isEmpty()) {
                     List<NgxGraphResponse.NgxNode> resultNodes = newNodes.stream()
-                            .map(NgxGraphResponse.NgxNode::new)
+                            .map(name -> new NgxGraphResponse.NgxNode(name, getSimpleClassName(name), isNodeCritical(node, name)))
                             .toList();
-                    graphs.add(new NgxGraphResponse(resultNodes, links, List.of()));
+                    graphs.add(new NgxGraphResponse(resultNodes, links));
                     processed.addAll(newNodes);
                 }
             }
@@ -242,7 +264,12 @@ public class GraphService {
         if (graphs.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "No matching nodes found for: " + nodes));
         }
-        return new NgxGraphMultiResponse(graphs);
+        return new NgxGraphMultiResponse(graphs, new NgxGraphMultiResponse.NgxTestPlan("Test Plan", testPlan));
+    }
+
+    private boolean isNodeCritical(String impactedNode, String nodeName) {
+        if (impactedNode == null || nodeName == null) return false;
+        return nodeName.contains(impactedNode.toLowerCase());
     }
 
     private void buildNgxLinks(GraphNode node, Set<String> visited, List<NgxGraphResponse.NgxLink> links, DependencyGraph graph) {
@@ -254,5 +281,11 @@ public class GraphService {
             links.add(new NgxGraphResponse.NgxLink(node.getName(), dep.getName(), "depends", critical));
             buildNgxLinks(dep, visited, links, graph);
         }
+    }
+
+    private String getSimpleClassName(String fullName) {
+        if (fullName == null) return null;
+        int lastDot = fullName.lastIndexOf('.');
+        return lastDot >= 0 ? fullName.substring(lastDot + 1) : fullName;
     }
 }
