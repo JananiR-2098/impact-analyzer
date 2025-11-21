@@ -17,6 +17,12 @@ export class Graph implements OnChanges {
   nodes: any[] = [];
   links: any[] = [];
   curve: any = curveLinear;
+  tooltip = {
+  visible: false,
+  text: '',
+  x: 0,
+  y: 0
+};
 
  sanitizeId(id: string): string {
   return id.replaceAll(/[^a-zA-Z0-9_-]/g, "_");
@@ -75,7 +81,7 @@ export class Graph implements OnChanges {
   return context.measureText(label).width;
 }
 
-onNodeHover(node: any) {
+onNodeHover(node: any, event: MouseEvent) {
   node.data = node.data || {};
   node.data.hover = true;
 
@@ -86,6 +92,13 @@ onNodeHover(node: any) {
       link.data.hover = true;
     }
   });
+
+  console.dir("Hovering over node:", node);
+  this.tooltip.visible = true;
+  this.tooltip.text = node.id;
+  this.tooltip.x = event.clientX + 12; // small offset
+  this.tooltip.y = event.clientY + 12;
+  
 }
 
 onNodeLeave(node: any) {
@@ -95,5 +108,18 @@ onNodeLeave(node: any) {
   this.links.forEach(link => {
     if (link.data) link.data.hover = false;
   });
+    this.tooltip.visible = false;
+
 }
+
+onNodeHoverId(event: MouseEvent, node: any) {
+  console.dir("Hovering over node:", node);
+  this.tooltip.visible = true;
+  this.tooltip.text = node.id;
+  this.tooltip.x = event.clientX + 12; // small offset
+  this.tooltip.y = event.clientY + 12;
+}
+
+
+
 }

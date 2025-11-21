@@ -20,3 +20,16 @@
 svg path {
   transition: stroke 0.2s ease-in-out, stroke-width 0.2s ease-in-out;
 }
+
+.svg-tooltip {
+  position: fixed;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.75);
+  color: white;
+  font-size: 13px;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 9999;
+  white-space: nowrap;
+  transform: translate(-50%, -30%);
+}
