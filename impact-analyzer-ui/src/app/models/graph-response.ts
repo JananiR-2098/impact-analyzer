@@ -4,4 +4,5 @@ import { Node } from './node';
 export interface GraphResponse {
   nodes: Node[];
   links: Link[];
+  reponame?: string;
 }

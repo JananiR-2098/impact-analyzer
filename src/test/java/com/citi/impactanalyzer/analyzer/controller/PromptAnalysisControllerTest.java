@@ -36,7 +36,7 @@ class PromptAnalysisControllerTest {
     }
 
     private final String testJson = "{\"nodes\":[],\"links\":[],\"testPlans\":[{\"title\":\"Test Plan\",\"testPlan\":\"Generated Test Plan\"}]}";
-    NgxGraphMultiResponse mockResponse = new NgxGraphMultiResponse(new ArrayList<NgxGraphResponse>(), null);
+    NgxGraphMultiResponse mockResponse = new NgxGraphMultiResponse(new ArrayList<NgxGraphResponse>(), null, null);
     List<String> mockNodes = java.util.Collections.singletonList("OrderService");
 
     @Test

@@ -63,7 +63,9 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
                 console.log("Received response from backend:", response);
                 const graphData = response?.graphs ?? [];
                 const testPlan = response?.testPlan?.testPlan ?? '';
+                const repoName = response?.repo?.repo ?? '';
                 this.sharedservice.openPanel({
+                    repoName: repoName,
                     graphData: graphData,
                     testPlan: testPlan,
                 });
@@ -71,6 +73,7 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
             error: (err) => {
                 console.error("Error from backend:", err);
                 this.sharedservice.openPanel({
+                    repoName: '',
                     graphData: [],
                     testPlan: '',
                 });

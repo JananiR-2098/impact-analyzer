@@ -45,6 +45,9 @@
     <div class="analysis-outputs">
       <div *ngIf="selectedTab === 'graph'" class="output output-graph">
         <div class="output-title">Impact Analysis Graph  and Code Flow</div>
+        <div *ngIf="reponame" style="font-weight: bold; margin-bottom: 0.5rem;">
+          Repository : {{ reponame }}
+        </div>
         <div *ngIf="graphData && graphData.length > 1">
           <button
             mat-raised-button
