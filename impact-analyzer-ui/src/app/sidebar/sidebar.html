@@ -20,8 +20,9 @@
             </button>
           </div>
         <div class="output-graph graph-wrapper" *ngIf="selectedGraph">
-          <app-graph [graph]="selectedGraph"></app-graph>
-        </div>
+        <app-graph
+            [graph]="selectedGraph">
+          </app-graph>        </div>
       </div>
 
       <div class="output output-testplan">

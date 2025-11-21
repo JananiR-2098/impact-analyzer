@@ -8,11 +8,12 @@ import { curveLinear } from 'd3-shape';
   imports: [NgxGraphModule],
   standalone: true,        
   templateUrl: './graph.html',
-  styleUrl: './graph.css',
+  styleUrls: ['./graph.css'],
 })
 
 export class Graph implements OnChanges {
   @Input() graph!: GraphResponse;
+
   nodes: any[] = [];
   links: any[] = [];
   curve: any = curveLinear;
@@ -21,31 +22,49 @@ export class Graph implements OnChanges {
   return id.replace(/[^a-zA-Z0-9_-]/g, "_");
  }
 
-  ngOnChanges() {
-    if (!this.graph) return;
+  ngOnChanges() { if (!this.graph) return;
 
-    this.nodes = this.graph.nodes.map(n => ({   
-      id: this.sanitizeId(n.id),
-      label: n.label || n.id
-    }));
+  console.log("Graph data received:", this.graph);
 
-    this.links = this.graph.links.map(l => ({
-      id: `${this.sanitizeId(l.source)}-${this.sanitizeId(l.target)}`,
-      source: this.sanitizeId(l.source),
-      target: this.sanitizeId(l.target),
-      label: l.label,
-      data: { critical: l.critical,
-        color: l.critical ? 'red' : '#6a5acd',
-        width: l.critical ? 4 : 2
-      }
-    }));
+  // 1. Build sanitized NODE list
+    this.nodes = this.graph.nodes.map(n => ({
+      id: n.id,
+      label: n.label || n.id,
+      data: {
+        critical: n.critical ?? false
+
+      }   
+     }));
+  console.log("Graph data received:", this.nodes);
+
+  // Build a fast lookup set
+  const nodeIds = new Set(this.nodes.map(n => n.id));
+
+  // 2. Build sanitized LINK list + filter invalid links
+   this.links = this.graph.links
+      .filter(l => nodeIds.has(l.source) && nodeIds.has(l.target))
+      .map(l => ({
+        id: `${l.source}-${l.target}`,
+        source: l.source,
+        target: l.target,
+        label: l.label || 'depends', 
+        data: {
+          critical: l.critical,
+          color: l.critical ? "red" : "#6a5acd",
+          width: l.critical ? 4 : 2
+        }
+      }));
+
+    console.log("Final nodes:", this.nodes);
+    console.log("Final links:", this.links);
+   
   }
 
-  onNodeClick(node: any) {
-    console.log("Sidebar graph node clicked:", node);
+   onNodeClick(node: any) {
+    console.log("Clicked:", node);
   }
 
   onLinkClick(link: any) {
-    console.log("Sidebar graph link clicked:", link);
+    console.log("Clicked link:", link);
   }
 }
