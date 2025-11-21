@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, OnInit  } from '@angular/core';
+import { Component, signal, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { InputPromptComponent } from './input-prompt/input-prompt.component';
 import { SidebarComponent } from './sidebar/sidebar';
@@ -12,29 +12,19 @@ import { Sharedservice } from './services/sharedservice';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements OnInit {
 
+export class App {
   chatBoxWidth : number = 300;
   minChatBoxWidth : number = 200;
   maxChatBoxWidth : number = 600;
   autoShrinkWidth : number = 250;
   
-
   isSidebarOpen = false;
   @ViewChild('rightSidenav') rightSidenav!: MatSidenav;
 
   constructor(
     private readonly shared: Sharedservice
   ) {}
-
-  ngOnInit() {
-    this.shared.panelData$.subscribe(msg => {
-      this.isSidebarOpen = true;
-      if (this.rightSidenav) {
-        this.rightSidenav.open();
-      }
-    });
-  }
 
   protected readonly title = signal('impact-analyzer-ui');
  

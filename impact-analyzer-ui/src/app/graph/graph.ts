@@ -8,7 +8,7 @@ import { curveLinear } from 'd3-shape';
   imports: [NgxGraphModule],
   standalone: true,        
   templateUrl: './graph.html',
-  styleUrl: './graph.css',
+  styleUrls: ['./graph.css'],
 })
 
 export class Graph implements OnChanges {
@@ -39,6 +39,9 @@ export class Graph implements OnChanges {
         width: l.critical ? 4 : 2
       }
     }));
+
+    console.log('Processed nodes for ngx-graph:', this.nodes);
+    console.log('Processed links for ngx-graph:', this.links);
   }
 
   onNodeClick(node: any) {
