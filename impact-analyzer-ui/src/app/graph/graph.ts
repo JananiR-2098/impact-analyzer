@@ -82,34 +82,68 @@ export class Graph implements OnChanges {
 }
 
 onNodeHover(node: any, event: MouseEvent) {
-  node.data = node.data || {};
-  node.data.hover = true;
+  // Tooltip
+  this.tooltip.visible = true;
+  this.tooltip.text = node.id;
+  this.tooltip.x = event.clientX + 12;
+  this.tooltip.y = event.clientY + 12;
 
-  // highlight connected links
+  // Reset all nodes first
+  this.nodes.forEach(n => {
+    n.data = n.data || {};
+    n.data.hover = false;
+    n.data.neighbor = false;
+  });
+
+  // Reset all links first
   this.links.forEach(link => {
     link.data = link.data || {};
-    if (link.source === node.id || link.target === node.id) {
+    link.data.hover = false;
+  });
+
+  // Highlight hovered node
+  node.data.hover = true;
+
+  // Find neighbors
+  const neighbors = new Set<string>();
+
+  this.links.forEach(link => {
+    if (link.source === node.id) {
+      neighbors.add(link.target);
+      link.data.hover = true;
+    }
+    if (link.target === node.id) {
+      neighbors.add(link.source);
       link.data.hover = true;
     }
   });
 
-  console.dir("Hovering over node:", node);
-  this.tooltip.visible = true;
-  this.tooltip.text = node.id;
-  this.tooltip.x = event.clientX + 12; // small offset
-  this.tooltip.y = event.clientY + 12;
-  
+  // Highlight neighbor nodes
+  this.nodes.forEach(n => {
+    if (neighbors.has(n.id)) {
+      n.data.neighbor = true;   // a new flag
+    }
+  });
 }
 
 onNodeLeave(node: any) {
-  node.data.hover = false;
+  // Hide tooltip
+  this.tooltip.visible = false;
 
-  // remove highlight from all links
-  this.links.forEach(link => {
-    if (link.data) link.data.hover = false;
+  // Reset all nodes
+  this.nodes.forEach(n => {
+    if (n.data) {
+      n.data.hover = false;
+      n.data.neighbor = false;
+    }
   });
-    this.tooltip.visible = false;
 
+  // Reset all links
+  this.links.forEach(l => {
+    if (l.data) {
+      l.data.hover = false;
+    }
+  });
 }
 
 onNodeHoverId(event: MouseEvent, node: any) {
