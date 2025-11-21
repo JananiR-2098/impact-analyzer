@@ -46,6 +46,7 @@ export class SidebarComponent implements OnInit {
         } else {
           this.testPlanHtml = parsed as string;
         }
+
         console.log("Received panel data:", data);
         console.log("GRAPH:", this.graphData);
         console.log("GRAPH:", this.selectedGraph);
@@ -54,46 +55,52 @@ export class SidebarComponent implements OnInit {
   }
 
   async exportPDF() {
-    const element = document.getElementById('exportSection');
+  const section = document.getElementById('exportSection');
+  if (!section) return;
 
-    if (!element) {
-      console.error("PDF element not found");
-      return;
-    }
+  // Save original styles
+  const originalHeight = section.style.height;
+  const originalOverflow = section.style.overflow;
 
-    await new Promise(res => setTimeout(res, 200));
+  // EXPAND FULL CONTENT
+  section.style.height = 'auto';
+  section.style.overflow = 'visible';
 
-    const canvas = await html2canvas(element, {
+  // Give Angular time to render expanded content
+  setTimeout(() => {
+    html2canvas(section, {
       scale: 2,
       useCORS: true,
-      logging: false
-    });
+      allowTaint: true,
+      scrollX: 0,
+      scrollY: -window.scrollY
+    }).then(canvas => {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
 
-    const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210;
+      let heightLeft = imgHeight;
+      let position = 0;
 
-    const pageHeight = 295;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-    }
 
-    pdf.save('impact-analysis-document.pdf');
-  }
+      while (heightLeft > 0) {
+        pdf.addPage();
+        position = heightLeft - imgHeight;
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
 
-   selectGraph(index: number) {
-    this.selectedGraph = this.graphData[index];
+      pdf.save('analysis-panel.pdf');
+
+      // RESTORE ORIGINAL STYLES
+      section.style.height = originalHeight;
+      section.style.overflow = originalOverflow;
+    });
+  }, 200);
   }
 }
