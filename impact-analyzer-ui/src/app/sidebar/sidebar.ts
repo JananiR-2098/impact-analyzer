@@ -16,9 +16,8 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
   standalone: true,
   templateUrl: './sidebar.html',
   imports: [CommonModule, MatSidenavModule, MatButtonModule, MatIconModule, Graph, NgxGraphModule],
-  styleUrls: ['./sidebar.css']
+  styleUrls: ['./sidebar.css'],
 })
-
 export class SidebarComponent implements OnInit {
   selectedTab: 'graph' | 'testplan' = 'graph';
   promptMessage: string = '';
@@ -31,14 +30,14 @@ export class SidebarComponent implements OnInit {
   constructor(private readonly sharedservice: Sharedservice) {}
 
   ngOnInit() {
-    this.sharedservice.panelData$.subscribe(data => {
-      if(data){
-        this.testPlan = data.testPlan ;
+    this.sharedservice.panelData$.subscribe((data) => {
+      if (data) {
+        this.testPlan = data.testPlan;
         this.graphData = data.graphData;
         if (this.graphData && this.graphData.length > 0) {
           this.selectedGraph = this.graphData[0];
         }
-        
+
         const parsed = marked.parse(this.testPlan || '');
         if (parsed instanceof Promise) {
           parsed.then((html: string) => {
@@ -48,88 +47,88 @@ export class SidebarComponent implements OnInit {
           this.testPlanHtml = parsed as string;
         }
 
-        console.log("Received panel data:", data);
-        console.log("GRAPH:", this.graphData);
-        console.log("GRAPH:", this.selectedGraph);
+        console.log('Received panel data:', data);
+        console.log('GRAPH:', this.graphData);
+        console.log('GRAPH:', this.selectedGraph);
       }
     });
   }
 
-@ViewChild('testPlanContent', { static: false }) testPlanContent!: ElementRef;
-@ViewChild('graphWrapper', { static: false }) graphWrapper?: ElementRef;
-exportCurrentTabPDF() {
-  if (this.selectedTab === 'testplan') {
-    const element = this.testPlanContent.nativeElement;
-    const clone = element.cloneNode(true) as HTMLElement;
-    clone.style.position = 'absolute';
-    clone.style.left = '-9999px';
-    clone.style.top = '0';
-    clone.style.height = 'auto';
-    clone.style.maxHeight = 'none';
-    clone.style.overflow = 'visible';
-    clone.style.width = element.scrollWidth + 'px';
-    document.body.appendChild(clone);
-    setTimeout(() => {
-      html2canvas(clone, {
-        useCORS: true,
-        windowWidth: clone.scrollWidth,
-        windowHeight: clone.scrollHeight,
-        scale: 2
-      }).then(canvas => {
-        document.body.removeChild(clone);
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        let heightLeft = pdfHeight;
-        let position = 0;
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pdf.internal.pageSize.getHeight();
-        while (heightLeft > 0) {
-          position = heightLeft - pdfHeight;
-          pdf.addPage();
+  @ViewChild('testPlanContent', { static: false }) testPlanContent!: ElementRef;
+  @ViewChild('graphWrapper', { static: false }) graphWrapper?: ElementRef;
+  exportCurrentTabPDF() {
+    if (this.selectedTab === 'testplan') {
+      const element = this.testPlanContent.nativeElement;
+      const clone = element.cloneNode(true) as HTMLElement;
+      clone.style.position = 'absolute';
+      clone.style.left = '-9999px';
+      clone.style.top = '0';
+      clone.style.height = 'auto';
+      clone.style.maxHeight = 'none';
+      clone.style.overflow = 'visible';
+      clone.style.width = element.scrollWidth + 'px';
+      document.body.appendChild(clone);
+      setTimeout(() => {
+        html2canvas(clone, {
+          useCORS: true,
+          windowWidth: clone.scrollWidth,
+          windowHeight: clone.scrollHeight,
+          scale: 2,
+        }).then((canvas) => {
+          document.body.removeChild(clone);
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          let heightLeft = pdfHeight;
+          let position = 0;
           pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
           heightLeft -= pdf.internal.pageSize.getHeight();
-        }
-        pdf.save('testplan.pdf');
-      });
-    }, 100);
-  } else if (this.selectedTab === 'graph' && this.graphWrapper) {
-    const element = this.graphWrapper.nativeElement;
-    const clone = element.cloneNode(true) as HTMLElement;
-    clone.style.position = 'absolute';
-    clone.style.left = '-9999px';
-    clone.style.top = '0';
-    clone.style.height = 'auto';
-    clone.style.maxHeight = 'none';
-    clone.style.overflow = 'visible';
-    clone.style.width = element.scrollWidth + 'px';
-    document.body.appendChild(clone);
-    setTimeout(() => {
-      html2canvas(clone, {
-        useCORS: true,
-        windowWidth: clone.scrollWidth,
-        windowHeight: clone.scrollHeight,
-        scale: 2
-      }).then(canvas => {
-        document.body.removeChild(clone);
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        let heightLeft = pdfHeight;
-        let position = 0;
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pdf.internal.pageSize.getHeight();
-        while (heightLeft > 0) {
-          position = heightLeft - pdfHeight;
-          pdf.addPage();
+          while (heightLeft > 0) {
+            position = heightLeft - pdfHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pdf.internal.pageSize.getHeight();
+          }
+          pdf.save('testplan.pdf');
+        });
+      }, 100);
+    } else if (this.selectedTab === 'graph' && this.graphWrapper) {
+      const element = this.graphWrapper.nativeElement;
+      const clone = element.cloneNode(true) as HTMLElement;
+      clone.style.position = 'absolute';
+      clone.style.left = '-9999px';
+      clone.style.top = '0';
+      clone.style.height = 'auto';
+      clone.style.maxHeight = 'none';
+      clone.style.overflow = 'visible';
+      clone.style.width = element.scrollWidth + 'px';
+      document.body.appendChild(clone);
+      setTimeout(() => {
+        html2canvas(clone, {
+          useCORS: true,
+          windowWidth: clone.scrollWidth,
+          windowHeight: clone.scrollHeight,
+          scale: 2,
+        }).then((canvas) => {
+          document.body.removeChild(clone);
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          let heightLeft = pdfHeight;
+          let position = 0;
           pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
           heightLeft -= pdf.internal.pageSize.getHeight();
-        }
-        pdf.save('impact-graph.pdf');
-      });
-    }, 100);
+          while (heightLeft > 0) {
+            position = heightLeft - pdfHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pdf.internal.pageSize.getHeight();
+          }
+          pdf.save('impact-graph.pdf');
+        });
+      }, 100);
+    }
   }
-}
 }

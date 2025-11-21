@@ -1,29 +1,35 @@
 <div class="chat-container">
-    <div class="chat-header">
-        <div class="chat-header__title">Impact Analyzer Chat Window</div> 
-    </div>
+  <div class="chat-header">
+    <div class="chat-header__title">Impact Analyzer Chat Window</div>
+  </div>
 
-    <div class="messages-container" #messagesContainer>
-        <div *ngFor="let message of messages" 
-            class="message" 
-            [ngClass]="{'user-message': message.sender === 'user', 'bot-message': message.sender === 'Mia'}">
-          <div class="message-content">
-            <span class="sender-name">{{ message.sender ==='user' ? 'You'
-                : 'Mia'}}: </span>
-            <span>{{ message.text }}</span>
-            <span class="timestamp">{{formatTimestamp(message.timestamp) }} </span>
-          </div>
-        </div>
+  <div class="messages-container" #messagesContainer>
+    <div
+      *ngFor="let message of messages"
+      class="message"
+      [ngClass]="{
+        'user-message': message.sender === 'user',
+        'bot-message': message.sender === 'Mia'
+      }"
+    >
+      <div class="message-content">
+        <span class="sender-name">{{ message.sender === 'user' ? 'You' : 'Mia' }}: </span>
+        <span>{{ message.text }}</span>
+        <span class="timestamp">{{ formatTimestamp(message.timestamp) }} </span>
+      </div>
     </div>
+  </div>
 
-    <div class="chat-input-area">
-        <input type="text" 
-            [(ngModel)]="newMessage"
-            (keyup.enter)="sendMessage()"
-            placeholder="Share your requirement..." 
-            class="chat-input">
-        <button mat-icon-button color="primary" (click)="sendMessage()" aria-label="Send Message"> 
-            <mat-icon>send</mat-icon>
-        </button>
-    </div>
+  <div class="chat-input-area">
+    <input
+      type="text"
+      [(ngModel)]="newMessage"
+      (keyup.enter)="sendMessage()"
+      placeholder="Share your requirement..."
+      class="chat-input"
+    />
+    <button mat-icon-button color="primary" (click)="sendMessage()" aria-label="Send Message">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
 </div>

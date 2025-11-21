@@ -1,69 +1,65 @@
 <div class="graph-container no-edit">
   @if(tooltip.visible){
-  <div class="svg-tooltip" 
-     [style.left.px]="tooltip.x"
-     [style.top.px]="tooltip.y">
-  {{ tooltip.text }}
-</div>
+  <div class="svg-tooltip" [style.left.px]="tooltip.x" [style.top.px]="tooltip.y">
+    {{ tooltip.text }}
+  </div>
   }
 
-<ngx-graph
-  class="graph-container"
-  [nodes]="nodes"
-  [links]="links"
-  [layout]="'dagre'"
-  [curve]="curve"
-  (nodeClick)="onNodeClick($event)"
-  (linkClick)="onLinkClick($event)"
->
-
-  <!-- Node Template -->
-  <ng-template #nodeTemplate let-node>
-     <svg:g class="graph-node"
-         (mouseenter)="onNodeHover(node, $event)"
-         (mousemove)="onNodeHoverId($event, node)"
-         (mouseleave)="onNodeLeave(node)">
+  <ngx-graph
+    class="graph-container"
+    [nodes]="nodes"
+    [links]="links"
+    [layout]="'dagre'"
+    [curve]="curve"
+    (nodeClick)="onNodeClick($event)"
+    (linkClick)="onLinkClick($event)"
+  >
+    <!-- Node Template -->
+    <ng-template #nodeTemplate let-node>
+      <svg:g
+        class="graph-node"
+        (mouseenter)="onNodeHover(node, $event)"
+        (mousemove)="onNodeHoverId($event, node)"
+        (mouseleave)="onNodeLeave(node)"
+      >
         <rect
-            [attr.width]="node.data?.textWidth + 20"
-            [attr.height]="30"
-            rx="15"
-            ry="15"
-            [attr.fill]="
-                 node.data?.hover ? '#ff9800' :
-              node.data?.neighbor ? '#ffc947' :
-              (node.data?.critical ? '#d9534f' : '#3f51b5')
-            "
-             stroke="#000"
-            [attr.stroke-width]="node.data?.hover ? 2 : 0"
+          [attr.width]="node.data?.textWidth + 20"
+          [attr.height]="30"
+          rx="15"
+          ry="15"
+          [attr.fill]="
+            node.data?.hover
+              ? '#ff9800'
+              : node.data?.neighbor
+              ? '#ffc947'
+              : node.data?.critical
+              ? '#d9534f'
+              : '#3f51b5'
+          "
+          stroke="#000"
+          [attr.stroke-width]="node.data?.hover ? 2 : 0"
         ></rect>
 
-      <text
-            x="10"
-            y="20"
-            fill="white"
-            style="font-size: 14px; font-family: Arial;"
-        >
-            {{ node.label }}
-    </text>
-    </svg:g>
-  </ng-template>
+        <text x="10" y="20" fill="white" style="font-size: 14px; font-family: Arial">
+          {{ node.label }}
+        </text>
+      </svg:g>
+    </ng-template>
 
-  <!-- Link Template -->
-  <ng-template #linkTemplate let-link>
-    <svg:g>
-      <svg:path
-        [attr.d]="link.line"
-        stroke="#888"
-        stroke-width="2"
-        [attr.stroke]="link.data?.hover ? '#ff9800' : '#888'"
-        [attr.stroke-width]="link.data?.hover ? 3 : 2"
-        fill="none">
-      </svg:path>
+    <!-- Link Template -->
+    <ng-template #linkTemplate let-link>
+      <svg:g>
+        <svg:path
+          [attr.d]="link.line"
+          stroke="#888"
+          stroke-width="2"
+          [attr.stroke]="link.data?.hover ? '#ff9800' : '#888'"
+          [attr.stroke-width]="link.data?.hover ? 3 : 2"
+          fill="none"
+        ></svg:path>
 
-      <svg:text text-anchor="middle" dy="-6" font-size="11">
-      </svg:text>
-    </svg:g>
-  </ng-template>
-
-</ngx-graph>
+        <svg:text text-anchor="middle" dy="-6" font-size="11"></svg:text>
+      </svg:g>
+    </ng-template>
+  </ngx-graph>
 </div>

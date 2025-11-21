@@ -5,9 +5,9 @@ import { Loader } from '../services/loader';
 @Component({
   selector: 'app-loader',
   standalone: true,
-  imports: [CommonModule, AsyncPipe],  
+  imports: [CommonModule, AsyncPipe],
   templateUrl: './loader.html',
-  styleUrls: ['./loader.css']
+  styleUrls: ['./loader.css'],
 })
 export class LoaderComponent {
   constructor(public loader: Loader) {}
