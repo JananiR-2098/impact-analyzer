@@ -12,8 +12,7 @@ export class WindowIdService {
   }
 
   private initializeId() {
-    if (globalThis.window === 'undefined') return;
-
+    if (typeof window === 'undefined') return;
     const saved = sessionStorage.getItem(this.KEY);
 
     if (saved) {
