@@ -9,14 +9,14 @@ interface Message {
 }
 
 @Component({
-  selector: 'app-input-prompt',
+  selector: 'app-chat-box',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './input-prompt.component.html',
-  styleUrls: ['./input-prompt.component.css'],
+  templateUrl: './chat-box.component.html',
+  styleUrls: ['./chat-box.component.css'],
 })
 
-export class InputPromptComponent implements OnInit, AfterViewChecked {
+export class ChatBoxComponent implements OnInit, AfterViewChecked {
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLDivElement>;
 
@@ -47,9 +47,9 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
       this.shouldScrollToBottom = true;
 
       setTimeout(() => {
-        this.messages.push({ text: 'Understanding the requirement. \n Analyzing the impacts based on your input. Please wait for graph rendering', sender: 'Mia', timestamp: new Date() });
+        this.messages.push({ text: 'Analyzing the impacts based on your input... Please wait.', sender: 'Mia', timestamp: new Date() });
         this.shouldScrollToBottom = true;
-      }, 600);
+      }, 800);
     }
   }
 
