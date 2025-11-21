@@ -1,5 +1,6 @@
 package com.citi.impactanalyzer.parser.service;
 
+import com.citi.impactanalyzer.parser.exception.ChatClientCommunicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -31,19 +32,19 @@ public class ChatClientService {
                         .content();
             } catch (Exception e) {
                 logger.warn("Chat client call failed on attempt {}/{}: {}", attempt, maxAttempts, e.getMessage());
-                if (attempt >= maxAttempts) {
+
+                 if (attempt >= maxAttempts) {
                     logger.error("Chat client call failed after {} attempts", attempt, e);
-                    throw new RuntimeException("Chat client failed", e);
+                    throw new ChatClientCommunicationException("Chat client failed after " + attempt + " attempts to communicate with the AI model.", e);
                 }
+
                 try {
                     Thread.sleep(properties.getChatRetryDelayMs());
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
-                    throw new RuntimeException("Interrupted while retrying chat client", ie);
                 }
             }
         }
-        throw new RuntimeException("Chat client failed after retries");
+        throw new ChatClientCommunicationException("Chat client failed after retries (unreachable code path).");
     }
 }
-
