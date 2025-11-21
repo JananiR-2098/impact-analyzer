@@ -5,10 +5,10 @@ import { Message } from '../models/msg';
 
 @Injectable({ providedIn: 'root' })
 export class Sharedservice {
-  private panelDataSource = new Subject<any>();
+  private readonly panelDataSource = new Subject<any>();
   panelData$ = this.panelDataSource.asObservable();
 
-  private panelOutputSource = new Subject<any>();
+  private readonly panelOutputSource = new Subject<any>();
   panelOutput$ = this.panelOutputSource.asObservable();
 
   openPanelold(msg: Message[]) {
