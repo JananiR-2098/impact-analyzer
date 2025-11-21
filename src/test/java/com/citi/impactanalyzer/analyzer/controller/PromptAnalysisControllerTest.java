@@ -32,14 +32,15 @@ class PromptAnalysisControllerTest {
     }
 
     private final String testJson = "{\"nodes\":[],\"links\":[],\"testPlans\":[{\"title\":\"Test Plan\",\"testPlan\":\"Generated Test Plan\"}]}";
-    NgxGraphResponse mockResponse = new NgxGraphResponse(List.of(), List.of(), List.of());
+    // NgxGraphResponse constructor takes two lists (nodes, links)
+    NgxGraphResponse mockResponse = new NgxGraphResponse(List.of(), List.of());
     List<String> mockNodes = java.util.Collections.singletonList("OrderService");
 
     @Test
     void testGetImpactedModules() throws Exception {
         when(promptAnalysisService.findNodeFromPrompt(anyString(), anyString())).thenReturn(mockNodes);
-        when(graphService.getImpactedModulesNgx(mockNodes)).thenReturn("ImpactedModulesResult");
         when(promptAnalysisService.getTestPlan(anyString(), anyString())).thenReturn("Generated Test Plan");
+        when(graphService.getImpactedModulesNgx(mockNodes, "Generated Test Plan")).thenReturn("ImpactedModulesResult");
 
         mockMvc.perform(post("/promptAnalyzer/impactedModules")
                         .param("sessionId", "testCohortValue")
@@ -64,7 +65,9 @@ class PromptAnalysisControllerTest {
     @Test
     void getImpactedModulesReturnsOriginalResponseWhenNotNgxGraphResponse() throws Exception {
         when(promptAnalysisService.findNodeFromPrompt(anyString(), anyString())).thenReturn(mockNodes);
-        when(graphService.getImpactedModulesNgx(mockNodes)).thenReturn("NonNgxGraphResponse");
+        // ensure the controller's testPlan call is stubbed so the graphService call has the expected second argument
+        when(promptAnalysisService.getTestPlan(anyString(), anyString())).thenReturn("Generated Test Plan");
+        when(graphService.getImpactedModulesNgx(mockNodes, "Generated Test Plan")).thenReturn("NonNgxGraphResponse");
 
         mockMvc.perform(post("/promptAnalyzer/impactedModules")
                         .content("Find impacted modules for OrderService")

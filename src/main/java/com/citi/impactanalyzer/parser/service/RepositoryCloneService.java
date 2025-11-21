@@ -1,4 +1,4 @@
-package com.citi.impactanalyzer.parser.clone;
+package com.citi.impactanalyzer.parser.service;
 
 import com.citi.impactanalyzer.parser.config.DependencyAnalyzerProperties;
 import jakarta.annotation.PostConstruct;

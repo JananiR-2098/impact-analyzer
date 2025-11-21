@@ -2,6 +2,9 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.6'
+    id 'checkstyle'
+    id 'com.github.spotbugs' version '6.0.0'
+    id 'pmd'
 }
 
 group = 'com.citi'
@@ -51,8 +54,60 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.12.2'
+
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+checkstyle {
+    toolVersion = '10.13.0'
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    ignoreFailures = false
+    showViolations = true
+    maxWarnings = Integer.MAX_VALUE
+}
+
+spotbugs {
+    ignoreFailures = false
+    effort = 'MAX'
+    reportLevel = 'MEDIUM'
+    toolVersion = '4.8.5'
+}
+
+spotbugsMain {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+spotbugsTest {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+pmd {
+    toolVersion = '7.0.0'
+    ignoreFailures = false
+    ruleSetConfig = resources.text.fromFile("${rootDir}/config/pmd/ruleset.xml")
+}
+
+pmdMain {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+pmdTest {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+

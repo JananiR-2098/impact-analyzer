@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -152,11 +153,17 @@ public class DependencyAggregationService {
             }
         }
 
+        // Prepare wrapper object containing repo name and dependencies
+        String repoName = extractRepoName();
+        Map<String, Object> outputWrapper = new HashMap<>();
+        outputWrapper.put("repo", repoName != null ? repoName : "");
+        outputWrapper.put("dependencies", allDependencies);
+
         try (FileWriter fw = new FileWriter(output)) {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(fw, allDependencies);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(fw, outputWrapper);
         }
 
-        logger.info("Dependency graph JSON generated at: {}", output.getAbsolutePath());
+        logger.info("Dependency graph JSON generated at: {} (repo={})", output.getAbsolutePath(), repoName);
     }
 
     private String sanitizeLlmOutput(String raw) {
@@ -174,5 +181,36 @@ public class DependencyAggregationService {
         }
 
         return sanitized.trim();
+    }
+
+    // Helper to extract repository name from configuration (prefer clone URL, then local path/baseDir)
+    private String extractRepoName() {
+        try {
+            String url = properties.getCloneRepoUrl();
+            if (url != null && !url.isBlank()) {
+                // strip trailing .git and any path
+                String cleaned = url.replaceAll("\\.git$", "");
+                int lastSlash = Math.max(cleaned.lastIndexOf('/'), cleaned.lastIndexOf('\\'));
+                if (lastSlash >= 0 && lastSlash < cleaned.length() - 1) {
+                    return cleaned.substring(lastSlash + 1);
+                }
+                return cleaned;
+            }
+
+            String local = properties.getCloneLocalPath();
+            if (local != null && !local.isBlank()) {
+                Path p = Path.of(local);
+                return p.getFileName().toString();
+            }
+
+            String baseDir = properties.getBaseDir();
+            if (baseDir != null && !baseDir.isBlank()) {
+                Path p = Path.of(baseDir);
+                return p.getFileName().toString();
+            }
+        } catch (Exception e) {
+            logger.debug("Failed to extract repo name: {}", e.getMessage());
+        }
+        return null;
     }
 }

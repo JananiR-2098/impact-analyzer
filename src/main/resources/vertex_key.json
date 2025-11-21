@@ -1,0 +1,10 @@
+{
+"@type":"type.googleapis.com/google.api.apikeys.v2.Key",
+"createTime":"2025-11-20T06:20:17.004500Z",
+"displayName":"local-ai-key",
+"etag":"W/\"nAvq6uXgMme84IpCnqbKIA==\"",
+"keyString":"AIzaSyBkrfOiX2Lz4p7KpUhUKraV1FqqdQY9BDA",
+"name":"projects/6307770862/locations/global/keys/632d687f-e751-41fd-9c4c-16199d859513",
+"uid":"632d687f-e751-41fd-9c4c-16199d859513",
+"updateTime":"2025-11-20T06:20:17.062668Z"
+}
