@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { marked } from 'marked';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -20,6 +20,7 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
 })
 
 export class SidebarComponent implements OnInit {
+  selectedTab: 'graph' | 'testplan' = 'graph';
   promptMessage: string = '';
   testPlan: string = '';
   graphData: GraphResponse[] = [];
@@ -54,53 +55,44 @@ export class SidebarComponent implements OnInit {
     });
   }
 
-  async exportPDF() {
-  const section = document.getElementById('exportSection');
-  if (!section) return;
+@ViewChild('testPlanContent', { static: false }) testPlanContent!: ElementRef;
+exportTestPDF() {
+  const element = this.testPlanContent.nativeElement;
+  
+  const clone = element.cloneNode(true) as HTMLElement;
+  clone.style.position = 'absolute';
+  clone.style.left = '-9999px';
+  clone.style.top = '0';
+  clone.style.height = 'auto';
+  clone.style.maxHeight = 'none';
+  clone.style.overflow = 'visible';
+  clone.style.width = element.scrollWidth + 'px';
+  document.body.appendChild(clone);
 
-  // Save original styles
-  const originalHeight = section.style.height;
-  const originalOverflow = section.style.overflow;
-
-  // EXPAND FULL CONTENT
-  section.style.height = 'auto';
-  section.style.overflow = 'visible';
-
-  // Give Angular time to render expanded content
   setTimeout(() => {
-    html2canvas(section, {
-      scale: 2,
+    html2canvas(clone, {
       useCORS: true,
-      allowTaint: true,
-      scrollX: 0,
-      scrollY: -window.scrollY
+      windowWidth: clone.scrollWidth,
+      windowHeight: clone.scrollHeight,
+      scale: 2
     }).then(canvas => {
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      document.body.removeChild(clone);
       const imgData = canvas.toDataURL('image/png');
-
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      let heightLeft = pdfHeight;
       let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pdf.internal.pageSize.getHeight();
       while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
         pdf.addPage();
-        position = heightLeft - imgHeight;
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pdf.internal.pageSize.getHeight();
       }
-
-      pdf.save('analysis-panel.pdf');
-
-      // RESTORE ORIGINAL STYLES
-      section.style.height = originalHeight;
-      section.style.overflow = originalOverflow;
+      pdf.save('testplan.pdf');
     });
-  }, 200);
-  }
+  }, 100);
+}
 }

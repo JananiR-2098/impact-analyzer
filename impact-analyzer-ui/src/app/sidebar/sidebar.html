@@ -1,39 +1,44 @@
 <div id="exportSection" class="analysis-container">
 
-  <div class="analysis-header">
-    <div class="analysis-title">Analysis</div>
-    <div class="analysis-actions">
-      <button mat-icon-button color="primary" style="font-size: 5px;" (click)="exportPDF()" aria-label="Download PDF">
+   <div class="analysis-header">
+    <div class="analysis-title"> Analysis </div>  
+  </div>
+
+
+  <div id="exportSection" class="analysis-body"> 
+
+    <div class="tab-buttons" style="margin-bottom: 1rem; display: flex; gap: 1rem;">
+      <button mat-raised-button color="primary" [disabled]="selectedTab === 'graph'" (click)="selectedTab = 'graph'">Impacted Files and Code Flow</button>
+      <button mat-raised-button color="primary" [disabled]="selectedTab === 'testplan'" (click)="selectedTab = 'testplan'">Test Plan Overview</button>
+      <div class="analysis-actions">
+      <button mat-icon-button color="primary" style="font-size: 5px;" (click)="exportTestPDF()" aria-label="Download PDF">
         <mat-icon>download</mat-icon> 
       </button>
     </div>
-  </div>
-  
-  <div class="analysis-body">
+    </div>
+
     <div class="analysis-outputs">
 
-      <div class="output output-graph">
+      <div *ngIf="selectedTab === 'graph'" class="output output-graph">
         <div class="output-title">Impacted Files and Code Flow</div>
           <div *ngIf="graphData && graphData.length > 1">
             <button mat-raised-button *ngFor="let g of graphData; let i = index" (click)="selectedGraph = g">
-             Graph {{ i + 1 }}
+              Impacted Module {{ i + 1 }}
             </button>
           </div>
         <div class="output-graph graph-wrapper" *ngIf="selectedGraph">
-        <app-graph
-            [graph]="selectedGraph">
-          </app-graph>        </div>
+          <app-graph [graph]="selectedGraph"></app-graph>
+        </div>
       </div>
 
-      <div class="output output-testplan">
+      <div *ngIf="selectedTab === 'testplan'" class="output output-testplan">
         <div class="output-title">Test Plan Overview</div>
-        <div class="output-content" [innerHTML]="testPlanHtml"></div>
+        <div class="output-content" #testPlanContent [innerHTML]="testPlanHtml"></div>
       </div>
+
     </div>
   </div>
 
-  <div class="chat-footer">
-    <!-- reserved for actions (e.g., close, clear) -->
-  </div>
+  <div class="chat-footer"> </div>
 
 </div>

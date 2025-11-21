@@ -1,3 +1,10 @@
+/* Custom color for tab button names in sidebar */
+.tab-buttons button[mat-raised-button] {
+  color: #1a237e !important; /* Deep blue for visibility */
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
 :host {
   display: block;
   padding: 0;
@@ -8,9 +15,9 @@
     flex-direction: column;
     position: fixed;
     right: 10px;
-    top: 8vh;
+    top: 2vh;
     width: 58vw;
-    height: 90vh; 
+    height: 96vh; 
 
     border: 1px solid #e0e0e0;
     border-radius: 8px;
@@ -38,12 +45,12 @@
 
 .analysis-actions {
   display: flex;
-  align-items: center;
+  align-items: right;
   gap: 8px;
 }
 
 .analysis-actions button {
-  color: #fff;
+  color: #333;
 }
 
 #exportSection {
@@ -83,9 +90,7 @@
   border: none;
   padding: 0;
   background: transparent;
-  height: 350px;
-  max-height: 70vh;
-  overflow-y: auto;
+  height: 440px;
   scrollbar-width: thin;
   display: flex;
   flex-direction: column;
@@ -102,7 +107,7 @@
 }
 
 .output-testplan .output-content {
-  max-height: 200px;
+  max-height: 480px;
   overflow-y: auto;
   display: block;
   scrollbar-width: thin;
