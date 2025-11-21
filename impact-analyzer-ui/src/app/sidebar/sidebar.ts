@@ -9,12 +9,13 @@ import { GraphResponse } from '../models/graph-response';
 import { Graph } from '../graph/graph';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   templateUrl: './sidebar.html',
-  imports: [CommonModule, MatSidenavModule, MatButtonModule, MatIconModule, Graph],
+  imports: [CommonModule, MatSidenavModule, MatButtonModule, MatIconModule, Graph, NgxGraphModule],
   styleUrls: ['./sidebar.css']
 })
 
@@ -91,5 +92,9 @@ export class SidebarComponent  {
     }
 
     pdf.save('impact-analysis-document.pdf');
+  }
+
+   selectGraph(index: number) {
+    this.selectedGraph = this.graphData[index];
   }
 }
