@@ -83,7 +83,7 @@ Project Setup
    ng serve
    ```
 5. **Access APIs and UI:**
-   - Backend: `http://localhost:8080`
+   - Backend: `http://localhost:8081`
    - Frontend: `http://localhost:4200`
 
 Evaluation Tips
@@ -114,6 +114,8 @@ Quick local setup (for new developers)
 -------------------------------------
 This section gives a minimal, practical set of steps so a new developer can run the project locally and iterate quickly.
 
+ImpactAnalyzer Service Setup
+------------------------------
 Prerequisites
 - Java 11+ installed and available on PATH.
 - Git (optional, used if you enable automatic cloning).
@@ -185,10 +187,63 @@ gradlew.bat bootRun --args="--analyzer.dependency-aggregation-enabled=false"
 
 - **Example Usage:**
   ```bash
-  curl -X POST "http://localhost:8080/promptAnalyzer/impactedModules?sessionId=12345" \
+  curl -X POST "http://localhost:8081/promptAnalyzer/impactedModules?sessionId=12345" \
        -H "Content-Type: application/json" \
        -d '{"prompt": "Analyze the impact of changing ServiceA"}'
   ```
+ImpactAnalyzer UI Setup
+------------------------
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.8.
+
+## Pre-requisities
+1) Installation (if you haven't already)
+- Install node.js and npm and then run the below. This will install all the required node modules.
+
+```bash
+cd impact-analyzer-ui
+npm install
+```
+
+2) Building
+- To build the project run:
+```bash
+ng build
+```
+
+3) Development server
+- To start a local development server, run:
+```bash
+ng serve --open
+```
+- Once the server is running, this will open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+
+4) Code scaffolding
+-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+```bash
+ng generate component component-name
+```
+- For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+```bash
+ng generate --help
+```
+This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+
+5) Running unit tests
+- To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+```bash
+ng test
+```
+
+6) Running end-to-end tests
+- For end-to-end (e2e) testing, run:
+```bash
+ng e2e
+```
+- Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+
+7) Additional Resources
+- For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
 
 Troubleshooting
 - If the app fails at the LLM call step:
