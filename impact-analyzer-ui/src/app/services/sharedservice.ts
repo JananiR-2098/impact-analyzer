@@ -4,7 +4,6 @@ import { GraphResponse } from '../models/graph-response';
 import { Message } from '../models/msg';
 
 @Injectable({ providedIn: 'root' })
-
 export class Sharedservice {
   private panelDataSource = new Subject<any>();
   panelData$ = this.panelDataSource.asObservable();
@@ -12,12 +11,12 @@ export class Sharedservice {
   private panelOutputSource = new Subject<any>();
   panelOutput$ = this.panelOutputSource.asObservable();
 
-  openPanelold(msg : Message[]) {
+  openPanelold(msg: Message[]) {
     this.panelDataSource.next(msg);
   }
 
-  openPanel(data: { graphData: GraphResponse[] , testPlan: string}) {
-    console.log("Shared Service - Opening panel with data:", data);
+  openPanel(data: { graphData: GraphResponse[]; testPlan: string }) {
+    console.log('Shared Service - Opening panel with data:', data);
     this.panelDataSource.next(data);
   }
 }
