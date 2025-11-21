@@ -31,14 +31,15 @@ export class Graph implements OnChanges {
       id: n.id,
       label: n.label || n.id,
       data: {
-        critical: n.critical ?? false
-
+        critical: n.critical ?? false,
+        textWidth: this.calculateTextWidth(n.label || '' )
       }   
      }));
   console.log("Graph data received:", this.nodes);
 
   // Build a fast lookup set
   const nodeIds = new Set(this.nodes.map(n => n.id));
+  
 
   // 2. Build sanitized LINK list + filter invalid links
    this.links = this.graph.links
@@ -66,4 +67,11 @@ export class Graph implements OnChanges {
   onLinkClick(link: any) {
     console.log("Clicked link:", link);
   }
+
+  calculateTextWidth(label: string): number {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d")!;
+  context.font = "14px Arial";  // match <text> style
+  return context.measureText(label).width;
+}
 }
