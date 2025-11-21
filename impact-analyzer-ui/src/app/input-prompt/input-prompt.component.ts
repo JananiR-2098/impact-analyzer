@@ -43,28 +43,42 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
 
   sendMessage(): void {
     if (this.newMessage.trim()) {
-      const v = this.newMessage.trim();
-      if (!v) return;
-      
-      this.messages.push({ text: this.newMessage.trim(), sender: 'user', timestamp: new Date() });
-      this.newMessage = '';
-      this.shouldScrollToBottom = true;
+        const v = this.newMessage.trim();
+        if (!v) return;
 
-      this.messageSent.emit();
+        this.messages.push({text: this.newMessage.trim(), sender: 'user', timestamp: new Date()});
+        this.newMessage = '';
+        this.shouldScrollToBottom = true;
 
-      this.messages.push({ text: 'Analyzing your requirement and evaluating impacted files. The impacted files and test plan are currently being generated. Please wait…', sender: 'Mia', timestamp: new Date() });
-      this.shouldScrollToBottom = true;
-    
-       this.chatService.getPromptResponse(v)
-      .subscribe(response => {
-        console.log ("Received response from backend:", response);
-        const graphData = response.graphs; 
-        const testPlan  = response.testPlan;
-        this.sharedservice.openPanel({ 
-          graphData: graphData as GraphResponse[],
-          testPlan: testPlan.testPlan});
-      });
-    }    
+        this.messageSent.emit();
+
+        this.messages.push({
+            text: 'Analyzing your requirement and evaluating impacted files. The impacted files and test plan are currently being generated. Please wait…',
+            sender: 'Mia',
+            timestamp: new Date()
+        });
+        this.shouldScrollToBottom = true;
+        this.chatService.getPromptResponse(v).subscribe({
+            next: (response) => {
+                console.log("Received response from backend:", response);
+                const graphData = response?.graphs ?? [];
+                const testPlan = response?.testPlan?.testPlan ?? '';
+                this.sharedservice.openPanel({
+                    graphData: graphData,
+                    testPlan: testPlan,
+                });
+            },
+            error: (err) => {
+                console.error("Error from backend:", err);
+                this.sharedservice.openPanel({
+                    graphData: [],
+                    testPlan: '',
+                });
+                this.messages.push({ text: 'No impact found in repo.', sender: 'Mia', timestamp: new Date() });
+                this.shouldScrollToBottom = true;
+            }
+        });
+    }
   }
 
   private scrollToBottom(): void {
