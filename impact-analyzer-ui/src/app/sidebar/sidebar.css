@@ -1,6 +1,5 @@
-/* Custom color for tab button names in sidebar */
 .tab-buttons button[mat-raised-button] {
-  color: #1a237e !important; /* Deep blue for visibility */
+  color: #1a237e !important;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
@@ -17,7 +16,7 @@
     right: 10px;
     top: 2vh;
     width: 58vw;
-    height: 96vh; 
+    height: 98vh; 
 
     border: 1px solid #e0e0e0;
     border-radius: 8px;
@@ -33,14 +32,11 @@
    border-bottom: 1px solid #e0e0e0;
    color: #333;
    font-size: 1.15em;
-   font-weight: 600;
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
+   font-weight: bold;
 }
 
 .analysis-title {
-    color: #333;
+    font-weight: 600;
 }
 
 .analysis-actions {
@@ -57,7 +53,6 @@
   height: auto !important;
 }
 
-
 .analysis-body {
   padding: 12px 16px;
   overflow-y: auto;
@@ -65,12 +60,6 @@
   background: #f6f1f1;
   padding-right: 8px;
   overflow: visible !important;
-}
-
-.analysis-outputs {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
 
 .output {
@@ -87,20 +76,18 @@
 }
 
 .output-graph .graph-wrapper {
-  border: none;
-  padding: 0;
-  background: transparent;
-  height: 440px;
-  scrollbar-width: thin;
+  width: 100%;
+  height: 460px;
+  min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  overflow: visible !important; 
 }
 
 .graph-wrapper app-graph {
   display: block;
   width: 100%;
-  height: auto;   /* adjust */
+  height: auto;
   min-height: 350px;
   max-height: none;
   flex: 1 0 auto;
