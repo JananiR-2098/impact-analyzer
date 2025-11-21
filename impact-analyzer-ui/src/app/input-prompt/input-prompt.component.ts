@@ -5,8 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Chatservice } from '../services/chatservice';
 import { Sharedservice } from '../services/sharedservice';
 import { GraphResponse } from '../models/graph-response';
-import { Testplan } from '../models/testplan';
-
 import { Message } from '../models/msg';
 
 @Component({
@@ -21,9 +19,9 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
 
   @Output() messageSent = new EventEmitter<void>();
 
-  constructor(private chatService: Chatservice, private sharedservice: Sharedservice) {}
+  constructor(private readonly chatService: Chatservice, private readonly sharedservice: Sharedservice) {}
 
-  @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('messagesContainer') private readonly messagesContainer!: ElementRef<HTMLDivElement>;
 
   messages: Message[] = [];
   newMessage = '';
@@ -54,7 +52,7 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
 
       this.messageSent.emit();
 
-      this.messages.push({ text: 'Understanding the requirement. Analyzing the impacts based on your input. Please wait for graph rendering on your right', sender: 'Mia', timestamp: new Date() });
+      this.messages.push({ text: 'Understanding the requirement and working on it. I will render a graph based on the impact analysis done with a basic test plan to help you start with the changes. Please wait', sender: 'Mia', timestamp: new Date() });
       this.shouldScrollToBottom = true;
     
        this.chatService.getPromptResponse(v)

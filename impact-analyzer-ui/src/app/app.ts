@@ -1,19 +1,18 @@
-import { Component, signal, ViewChild  } from '@angular/core';
+import { Component, signal, ViewChild, OnInit  } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { InputPromptComponent } from './input-prompt/input-prompt.component';
-import { HttpClient, HttpClientModule  } from '@angular/common/http';
 import { SidebarComponent } from './sidebar/sidebar';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { Sharedservice } from './services/sharedservice';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, InputPromptComponent, SidebarComponent , HttpClientModule , MatSidenavModule
+  imports: [RouterOutlet, InputPromptComponent, SidebarComponent, MatSidenavModule
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
 
   chatBoxWidth : number = 300;
   minChatBoxWidth : number = 200;
@@ -25,8 +24,7 @@ export class App {
   @ViewChild('rightSidenav') rightSidenav!: MatSidenav;
 
   constructor(
-    private http: HttpClient,
-    private shared: Sharedservice
+    private readonly shared: Sharedservice
   ) {}
 
   ngOnInit() {

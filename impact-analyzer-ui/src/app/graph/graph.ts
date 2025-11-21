@@ -18,7 +18,7 @@ export class Graph implements OnChanges {
   curve: any = curveLinear;
 
  sanitizeId(id: string): string {
-  return id.replace(/[^a-zA-Z0-9_-]/g, "_");
+  return id.replaceAll(/[^a-zA-Z0-9_-]/g, "_");
  }
 
   ngOnChanges() {
