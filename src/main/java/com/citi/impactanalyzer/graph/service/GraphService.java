@@ -86,8 +86,9 @@ public class GraphService {
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(jsonFile);
+        JsonNode dependencies = root.get("dependencies");
 
-        buildGraphFromJson(root);
+        buildGraphFromJson(dependencies);
         computeEdgeCriticality();
         vectorizeGraphNodes(root);
 

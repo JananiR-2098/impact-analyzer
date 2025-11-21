@@ -55,10 +55,6 @@ public class PromptAnalysisService {
     private final EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
 
 
-    // ----------------------------------------------------------------------
-    // Initialization
-    // ----------------------------------------------------------------------
-
     @PostConstruct
     public void init() throws IOException {
         logger.info("Initializing PromptAnalysisService...");
@@ -75,15 +71,16 @@ public class PromptAnalysisService {
         }
 
         JsonNode root = new ObjectMapper().readTree(jsonFile);
+        JsonNode dependencies = root.get("dependencies");
 
-        if (root == null || !root.isArray()) {
+        if (dependencies == null || !dependencies.isArray()) {
             logger.warn("Invalid graph JSON — expected top-level array.");
             return;
         }
 
         int count = 0;
 
-        for (JsonNode node : root) {
+        for (JsonNode node : dependencies) {
             if (!node.has("source")) continue;
 
             var id = node.path("source").asText(null);
