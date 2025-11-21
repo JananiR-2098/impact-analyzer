@@ -35,7 +35,7 @@ public class PromptAnalysisService {
 
     private static final int MAX_RESULTS = 2;
     private static final double MIN_SCORE = 0.6;
-    private static final int CHAT_MEMORY_SIZE = 10;
+    private static final int CHAT_MEMORY_SIZE = 100;
 
     @Value("${graph.json.path}")
     private String graphJsonPath;

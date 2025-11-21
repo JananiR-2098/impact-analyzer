@@ -28,6 +28,8 @@ public class GraphService {
 
     private final DependencyGraph graph;
 
+    private String repoName;
+
     @Value("${graph.json.path}")
     private String graphJsonPath;
 
@@ -77,6 +79,7 @@ public class GraphService {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(jsonFile);
         JsonNode dependencies = root.get("dependencies");
+        repoName = root.get("repo").asText();
 
         buildGraphFromJson(dependencies);
         computeEdgeCriticality();
@@ -222,7 +225,8 @@ public class GraphService {
         if (graphs.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "No matching nodes found for: " + nodes));
         }
-        return new NgxGraphMultiResponse(graphs, new NgxGraphMultiResponse.NgxTestPlan("Test Plan", testPlan));
+        return new NgxGraphMultiResponse(graphs, new NgxGraphMultiResponse.NgxTestPlan("Test Plan", testPlan),
+                new NgxGraphMultiResponse.NgxRepo("Repo", repoName ));
     }
 
     private boolean isNodeCritical(String impactedNode, String nodeName) {
