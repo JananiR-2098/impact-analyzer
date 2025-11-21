@@ -6,6 +6,7 @@ import { Chatservice } from '../services/chatservice';
 import { Sharedservice } from '../services/sharedservice';
 import { GraphResponse } from '../models/graph-response';
 import { Message } from '../models/msg';
+import {PromptResponse} from "../models/prompt-response";
 
 @Component({
   selector: 'app-input-prompt',
@@ -59,7 +60,7 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
         });
         this.shouldScrollToBottom = true;
         this.chatService.getPromptResponse(v).subscribe({
-            next: (response) => {
+            next: (response: PromptResponse) => {
                 console.log("Received response from backend:", response);
                 const graphData = response?.graphs ?? [];
                 const testPlan = response?.testPlan?.testPlan ?? '';

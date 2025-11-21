@@ -28,9 +28,9 @@ public class PromptAnalysisController {
 
     @PostMapping("/impactedModules")
     public ResponseEntity<?> getImpactedModules(@RequestParam String sessionId, @RequestBody String prompt) throws IOException {
-        logger.info("Received request to analyze impacted modules for prompt: {}", prompt);
+        logger.info("Received request to analyze impacted modules for prompt: {} sessionId: {}", prompt, sessionId);
         List<String> nodes = promptAnalysisService.findNodeFromPrompt(sessionId, prompt);
-        String testPlan = promptAnalysisService.getTestPlan(sessionId, prompt);
+        String testPlan = nodes.isEmpty() ? null : promptAnalysisService.getTestPlan(sessionId, prompt, String.join(",", nodes));
         Object impactedModules = graphService.getImpactedModulesNgx(nodes, testPlan);
         return ResponseEntity.ok(impactedModules);
     }

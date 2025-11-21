@@ -154,8 +154,8 @@ public class PromptAnalysisService {
         return chatWithAssistant(sessionId, query);
     }
 
-    public String getTestPlan(String changeRequest, String sessionId, String impactedFileJson) throws IOException {
-        var prompt = buildTestPlanPrompt(changeRequest, impactedFileJson);
+    public String getTestPlan(String changeRequest, String sessionId, String nodes) throws IOException {
+        var prompt = buildTestPlanPrompt(changeRequest, nodes);
         return chatWithAssistant(sessionId, prompt);
     }
 
@@ -163,18 +163,20 @@ public class PromptAnalysisService {
         return """
             You are an expert software architect and impact analyst.
             
-            You will receive a user query describing a change request. %s
+            You will receive:
+            1. A JSON object representing a Java project structure.
+            2. A user query describing a change request.
             
             Your task:
-            - Analyze the embedding store representing a Java project structure (packages, classes, methods, dependencies, etc.).
-            - Identify and return the relevant class names that will be impacted by the change request.
+            - Analyze the JSON structure.
+            - Understand the user request: '%s'
             - DO NOT invent class names.
             - Exclude test classes.
-            - Return only the class names(present in embedding store also exclude package name) as plain text, separated by commas, with no explanation or additional formatting.
+            - Return only the class names(present in JSON also exclude package name) as plain text, separated by commas, with no explanation or additional formatting.
             """.formatted(userPrompt);
     }
 
-    private String buildTestPlanPrompt(String changeRequest, String impactedFileJson) {
+    private String buildTestPlanPrompt(String changeRequest, String nodes) {
         return """
             You are a software test plan generator.
             You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
@@ -183,8 +185,9 @@ public class PromptAnalysisService {
             Your task:
             - Generate a complete TEST PLAN for the impacted files in the JSON.
             - The test plan should include unit tests, integration tests, and system tests.
-            Here are the changes the developer wants to make to the code %s";
-            """.formatted(changeRequest);
+            - Here are the impacted class names seperated by commas: %s
+            - Here are the changes the developer wants to make to the code: %s";
+            """.formatted(nodes, changeRequest);
     }
 
     private List<String> extractClassList(String response) {
