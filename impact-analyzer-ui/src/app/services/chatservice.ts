@@ -15,6 +15,6 @@ export class Chatservice {
   }
 
   getPromptResponse(msg: string): Observable<PromptResponse> {
-    return this.http.post<PromptResponse>(this.API_URL+"?sessionId=131242", { text: msg });
+    return this.http.post<PromptResponse>(this.API_URL+"?sessionId=131343", { text: msg });
   }
 }

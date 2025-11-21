@@ -8,7 +8,15 @@
   width: 100%;
   height: 500px;
 }
-  
+
 .no-edit svg {
   pointer-events: none !important;
+}
+
+.graph-node rect {
+  transition: all 0.2s ease-in-out;
+}
+
+svg path {
+  transition: stroke 0.2s ease-in-out, stroke-width 0.2s ease-in-out;
 }
