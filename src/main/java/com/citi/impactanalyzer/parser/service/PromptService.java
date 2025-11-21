@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 public class PromptService {
 
     private static final Logger logger = LoggerFactory.getLogger(PromptService.class);
+    public static final String AUTO_DETECT_ALL = "AUTO_DETECT_ALL";
     private final ChatClientService chatService;
     private final DependencyAnalyzerProperties properties;
 
@@ -21,14 +22,6 @@ public class PromptService {
      * Analyze code dependencies for Java, Python, Go, JS/TS
      */
     public String analyzeCodeDependencies(String code, String language) {
-        String prompt = buildCodePrompt(code, language);
-        return chatService.sendPrompt(prompt);
-    }
-
-    /**
-     * Analyze and group code dependencies by source and relation type
-     */
-    public String analyzeAndGroupCodeDependencies(String code, String language) {
         String prompt = buildCodePrompt(code, language);
         return chatService.sendPrompt(prompt);
     }
@@ -60,12 +53,12 @@ public class PromptService {
             } else {
                 // If still null, use a wildcard approach - include all internal dependencies
                 logger.warn("Could not determine base package. Including all internal dependencies without filtering.");
-                basePackage = "AUTO_DETECT_ALL";
+                basePackage = AUTO_DETECT_ALL;
             }
         }
 
         String scopeRules;
-        if ("AUTO_DETECT_ALL".equals(basePackage)) {
+        if (AUTO_DETECT_ALL.equals(basePackage)) {
             // When base package is unknown, include all dependencies but exclude only external libraries
             scopeRules = """
                 ### DEPENDENCY SCOPE RULES (AUTO-DETECT MODE) ###
@@ -114,7 +107,7 @@ public class PromptService {
     """, language, language, code, scopeRules);
 
         // --- Non-Grouped Output (The ONLY Output Block) ---
-        String finalBasePackage = basePackage.equals("AUTO_DETECT_ALL") ? "org.springframework.samples.petclinic" : basePackage;
+        String finalBasePackage = basePackage.equals(AUTO_DETECT_ALL) ? "org.springframework.samples.petclinic" : basePackage;
         return common + String.format("""
 
     Example output:
