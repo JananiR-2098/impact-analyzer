@@ -1,4 +1,4 @@
-import { Component,OnInit, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { marked } from 'marked';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -19,16 +19,15 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
   styleUrls: ['./sidebar.css']
 })
 
-export class SidebarComponent  {
+export class SidebarComponent implements OnInit {
   promptMessage: string = '';
   testPlan: string = '';
   graphData: GraphResponse[] = [];
   panelData: any = null;
   selectedGraph!: GraphResponse;
-
   testPlanHtml: string = '';
 
-  constructor(private sharedservice: Sharedservice) {}
+  constructor(private readonly sharedservice: Sharedservice) {}
 
   ngOnInit() {
     this.sharedservice.panelData$.subscribe(data => {
@@ -38,7 +37,7 @@ export class SidebarComponent  {
         if (this.graphData && this.graphData.length > 0) {
           this.selectedGraph = this.graphData[0];
         }
-        // Convert markdown to HTML (handle both sync and async)
+        
         const parsed = marked.parse(this.testPlan || '');
         if (parsed instanceof Promise) {
           parsed.then((html: string) => {

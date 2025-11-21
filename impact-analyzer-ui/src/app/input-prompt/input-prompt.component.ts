@@ -5,8 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Chatservice } from '../services/chatservice';
 import { Sharedservice } from '../services/sharedservice';
 import { GraphResponse } from '../models/graph-response';
-import { Testplan } from '../models/testplan';
-
 import { Message } from '../models/msg';
 
 @Component({
@@ -21,9 +19,9 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
 
   @Output() messageSent = new EventEmitter<void>();
 
-  constructor(private chatService: Chatservice, private sharedservice: Sharedservice) {}
+  constructor(private readonly chatService: Chatservice, private readonly sharedservice: Sharedservice) {}
 
-  @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('messagesContainer') private readonly messagesContainer!: ElementRef<HTMLDivElement>;
 
   messages: Message[] = [];
   newMessage = '';

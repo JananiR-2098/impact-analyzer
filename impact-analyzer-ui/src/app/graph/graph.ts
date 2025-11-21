@@ -19,7 +19,7 @@ export class Graph implements OnChanges {
   curve: any = curveLinear;
 
  sanitizeId(id: string): string {
-  return id.replace(/[^a-zA-Z0-9_-]/g, "_");
+  return id.replaceAll(/[^a-zA-Z0-9_-]/g, "_");
  }
 
   ngOnChanges() { if (!this.graph) return;
@@ -56,8 +56,7 @@ export class Graph implements OnChanges {
       }));
 
     console.log("Final nodes:", this.nodes);
-    console.log("Final links:", this.links);
-   
+    console.log("Final links:", this.links);   
   }
 
    onNodeClick(node: any) {
