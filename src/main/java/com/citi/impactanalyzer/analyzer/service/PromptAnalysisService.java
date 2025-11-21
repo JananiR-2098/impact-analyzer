@@ -161,23 +161,21 @@ public class PromptAnalysisService {
 
     private String buildImpactAnalysisPrompt(String userPrompt) {
         return """
-            You are an expert software architect and impact analyst.
-            
-            You will receive:
-            1. A JSON object representing a Java project structure.
-            2. A user query describing a change request.
-            
-            Your task:
-            - Analyze the JSON structure.
-            - Understand the user request: '%s'
-            - DO NOT invent class names.
-            - Exclude test classes.
-            - Return only the class names(present in JSON also exclude package name) as plain text, separated by commas, with no explanation or additional formatting.
-            """.formatted(userPrompt);
+                You are an expert software architect and impact analyst.
+                
+                You will receive a user query describing a change request. %s
+                
+                Your task:
+                - Analyze the embedding store representing a Java project structure (packages, classes, methods, dependencies, etc.).
+                - Identify and return the relevant class names that will be impacted by the change request.
+                - DO NOT invent class names.
+                - Exclude test classes.
+                - Return only the class names(present in embedding store also exclude package name) as plain text, separated by commas, with no explanation or additional formatting.
+                """.formatted(userPrompt);
     }
 
-    private String buildTestPlanPrompt(String changeRequest, String nodes) {
-        return """
+private String buildTestPlanPrompt(String changeRequest, String nodes) {
+return """
             You are a software test plan generator.
             You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
             Analyse the repository structure, functionality, public methods, and potential risks.
