@@ -6,7 +6,7 @@ import { PromptResponse } from '../models/prompt-response';
 @Injectable({ providedIn: 'root' })
 export class Chatservice {
 
-  private API_URL = 'http://localhost:8080/api/chat/impactanalyser'; // your backend endpoint
+  private API_URL = 'http://localhost:8081/promptAnalyzer/impactedModules'; // your backend endpoint
 
   constructor(private http: HttpClient) {}
 

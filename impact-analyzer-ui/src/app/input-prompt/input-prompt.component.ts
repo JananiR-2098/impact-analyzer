@@ -52,7 +52,7 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
 
       this.messageSent.emit();
 
-      this.messages.push({ text: 'Understanding the requirement and working on it. I will render a graph based on the impact analysis done with a basic test plan to help you start with the changes. Please wait', sender: 'Mia', timestamp: new Date() });
+      this.messages.push({ text: 'Analyzing your requirement and evaluating impacted files. The impacted files and test plan are currently being generated. Please wait…', sender: 'Mia', timestamp: new Date() });
       this.shouldScrollToBottom = true;
     
        this.chatService.getPromptResponse(v)
