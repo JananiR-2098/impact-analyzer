@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { marked } from 'marked';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -20,6 +20,7 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
 })
 
 export class SidebarComponent implements OnInit {
+  selectedTab: 'graph' | 'testplan' = 'graph';
   promptMessage: string = '';
   testPlan: string = '';
   graphData: GraphResponse[] = [];
@@ -53,47 +54,44 @@ export class SidebarComponent implements OnInit {
     });
   }
 
-  async exportPDF() {
-    const element = document.getElementById('exportSection');
+@ViewChild('testPlanContent', { static: false }) testPlanContent!: ElementRef;
+exportTestPDF() {
+  const element = this.testPlanContent.nativeElement;
+  
+  const clone = element.cloneNode(true) as HTMLElement;
+  clone.style.position = 'absolute';
+  clone.style.left = '-9999px';
+  clone.style.top = '0';
+  clone.style.height = 'auto';
+  clone.style.maxHeight = 'none';
+  clone.style.overflow = 'visible';
+  clone.style.width = element.scrollWidth + 'px';
+  document.body.appendChild(clone);
 
-    if (!element) {
-      console.error("PDF element not found");
-      return;
-    }
-
-    await new Promise(res => setTimeout(res, 200));
-
-    const canvas = await html2canvas(element, {
-      scale: 2,
+  setTimeout(() => {
+    html2canvas(clone, {
       useCORS: true,
-      logging: false
+      windowWidth: clone.scrollWidth,
+      windowHeight: clone.scrollHeight,
+      scale: 2
+    }).then(canvas => {
+      document.body.removeChild(clone);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      let heightLeft = pdfHeight;
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pdf.internal.pageSize.getHeight();
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pdf.internal.pageSize.getHeight();
+      }
+      pdf.save('testplan.pdf');
     });
-
-    const imgData = canvas.toDataURL('image/png');
-
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210;
-
-    const pageHeight = 295;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    pdf.save('impact-analysis-document.pdf');
-  }
-
-   selectGraph(index: number) {
-    this.selectedGraph = this.graphData[index];
-  }
+  }, 100);
+}
 }
