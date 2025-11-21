@@ -20,11 +20,31 @@ MIA (Markets Solution Sculptors-Impact Analyzer) is an AI-powered code analysis 
 ---
 
 ## Technical Stack
-- **Backend:** Java 11+, Spring Boot, Gradle, LangChain4j, Vertex AI, JUnit, Mockito
-- **Frontend:** Angular 20+, Angular Material, TypeScript
-- **Build/Dev Tools:** Gradle, npm, Node.js
-- **AI/ML:** Vertex AI, LangChain4j, **VectorDB Embedding Model** (for semantic code search and advanced dependency extraction)
-- **Other:** Mermaid (for diagrams), SLF4J, Jackson
+
+### Backend
+- **Language:** Java 17
+- **Framework:** Spring Boot 3.5.7
+- **AI Integration:** Spring AI (Vertex AI Gemini, Core, BOM), LangChain4j (core, embeddings, Vertex AI Gemini)
+- **Code Analysis:** JavaParser
+- **Git Operations:** Eclipse JGit
+- **Testing:** JUnit Platform, Spring Boot Starter Test
+- **Development Tools:** Spring Boot DevTools
+
+### Frontend
+- **Framework:** Angular 20.x (core, material, cdk, forms, router)
+- **Build Tools:** Angular CLI, Build, Compiler
+- **Visualization:** @swimlane/ngx-charts, @swimlane/ngx-graph, d3
+- **PDF & Image Export:** html2canvas, jspdf
+- **Markdown Support:** marked
+- **Reactive Programming:** rxjs
+- **Language:** TypeScript 5.9.2
+- **Testing:** Jasmine, Karma
+- **Code Formatting:** Prettier
+
+### Other
+- **Dependency Management:** Gradle (backend), npm (frontend)
+- **Diagramming:** draw.io (for architecture diagrams)
+- **In-memory Storage:** VectorDB Embedding Model (semantic code search, graph storage)
 
 ---
 
@@ -53,6 +73,7 @@ The architecture of MIA (Markets Solution Sculptors-Impact Analyzer) is designed
 
 **Solution Diagram:**
 ![High-Level Architecture](solution_diagram.jpg)
+*Diagram created using draw.io*
 
 ---
 
