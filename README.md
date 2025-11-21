@@ -1,237 +1,249 @@
-Impact Analyzer
-===============
+# MIA (Markets Solution Sculptors-Impact Analyzer)
 
-Overview
---------
-Impact Analyzer is an intelligent code analysis platform designed to help developers understand the impact of code changes across large, complex codebases. It leverages AI (LLM) to extract dependencies, builds a navigable dependency graph, and provides prompt-driven impact analysis and automated test plan generation. The project features a modern Angular UI for visualization and a robust Spring Boot backend for analysis and orchestration.
+## Overview
+MIA (Markets Solution Sculptors-Impact Analyzer) is an AI-powered code analysis platform that helps developers, architects, and QA teams understand the impact of code changes across large, complex codebases. Leveraging advanced LLMs (Vertex AI, LangChain4j), it extracts dependencies, builds a navigable dependency graph, and provides prompt-driven impact analysis and automated test plan generation. The platform features a modern Angular UI for visualization and a robust Spring Boot backend for orchestration and analysis.
 
-Features
---------
+---
+
+## Key Features
 - **Automated Dependency Extraction:** Scans source code and uses LLMs to extract dependencies, generating a JSON graph.
 - **Impact Analysis:** Accepts natural language prompts to identify impacted modules and generate test plans.
 - **Graph Visualization:** Interactive UI to explore dependencies and impact paths.
 - **Test Plan Generation:** AI-powered generation of test plans for impacted modules.
+- **Download as PDF:** Option to download the dependency graph and test plan as PDF documents for sharing and offline review.
+- **In-memory VectorDB Storage:** Uses VectorDB as an in-memory store to efficiently store and retrieve the graph JSON for fast analysis.
+- **Chat Memory:** Maintains chat memory per session to provide conversational continuity and context-aware responses.
 - **RESTful API:** Endpoints for impact analysis, graph traversal, and test plan generation.
 - **Pluggable AI Integration:** Supports LangChain4j and Vertex AI for advanced code analysis.
 - **Configurable Cloning:** Can auto-clone target repositories for analysis.
 
-Architecture
-------------
-- **Backend:** Java (Spring Boot), organized into parser, graph, and analyzer modules. Key classes:
-  - `DependencyAggregationService`: Scans and aggregates dependencies.
-  - `GraphService`: Loads and traverses the dependency graph.
-  - `PromptAnalysisService`: Handles prompt-driven analysis and test plan generation.
-  - `PromptAnalysisController`: Exposes REST endpoints.
-- **Frontend:** Angular (v20+), with Material UI, visualizes the dependency graph and interacts with backend APIs.
-- **AI Integration:** LangChain4j and Vertex AI for LLM-based analysis.
+---
 
-Technologies Used
-----------------
+## Technical Stack
+- **Backend:** Java 11+, Spring Boot, Gradle, LangChain4j, Vertex AI, JUnit, Mockito
+- **Frontend:** Angular 20+, Angular Material, TypeScript
+- **Build/Dev Tools:** Gradle, npm, Node.js
+- **AI/ML:** Vertex AI, LangChain4j, **VectorDB Embedding Model** (for semantic code search and advanced dependency extraction)
+- **Other:** Mermaid (for diagrams), SLF4J, Jackson
 
-#### Backend
-- **Java**:
-  - Spring Boot for application development.
-  - JUnit and Mockito for testing.
-  - SLF4J for logging.
-  - Jackson for JSON processing.
-  - LangChain4j for AI-related functionalities.
+---
 
-- **Build Tool**:
-  - Gradle for dependency management and build automation.
+## Architecture
 
-#### Frontend
-- **Angular**:
-  - Angular framework (version 20.x) for building the user interface.
-  - Angular Material for UI components.
+The architecture of MIA (Markets Solution Sculptors-Impact Analyzer) is designed for modularity, scalability, and seamless AI integration. Here’s how the system works:
 
-#### Additional Tools and Libraries
-- **AI Integration**:
-  - LangChain4j for embedding models and AI services.
-  - Vertex AI for AI-based analysis.
+- **User/Developer:** Interacts with the system via the Angular UI, submitting prompts or requests for impact analysis and test plan generation.
+- **Angular UI:** Modern, interactive interface for visualizing dependency graphs, submitting prompts, and downloading reports. Communicates with the backend via REST APIs.
+- **Spring Boot Backend:** Orchestrates the analysis workflow. Receives requests from the UI, manages session and chat memory, and coordinates code parsing, aggregation, and AI interactions.
+- **Parser & Aggregator:** Scans the source code, builds prompts, and prepares data for analysis. Utilizes LLMs and embedding models for advanced code understanding.
+- **LLM Integration (Vertex AI, LangChain4j):** Processes prompts and code context to extract dependencies, analyze impact, and generate test plans. Embedding models and VectorDB are used for semantic search and fast retrieval.
+- **VectorDB (In-memory Store):** Stores the dependency graph JSON and supports fast, scalable graph queries and semantic search operations.
+- **Dependency Graph Service:** Loads, manages, and updates the dependency graph in memory, supporting incremental updates and real-time analysis.
+- **Prompt Analysis Service:** Handles prompt-driven impact analysis, test plan generation, and maintains chat memory for session continuity.
+- **Controllers:** Expose REST endpoints for graph traversal, impact analysis, and test plan generation.
+- **Storage:** Dependency graph and analysis results are stored as JSON files and can be exported as PDF reports.
 
-Execution Details
------------------
-- **Backend:**
-  - Build: `gradlew.bat build`
-  - Run: `gradlew.bat bootRun`
-  - Main class: `com.citi.impactanalyzer.ImpactAnalyzerApplication`
-- **Frontend:**
-  - Navigate to `impact-analyzer-ui/`
-  - Install dependencies: `npm install`
-  - Run: `ng serve`
-  - Access UI at `http://localhost:4200`
+**Data Flow:**
+1. User submits a prompt or request via the UI.
+2. UI sends the request to the backend REST API.
+3. Backend parses the code, aggregates context, and interacts with LLMs/VectorDB.
+4. Dependency graph is updated and stored in memory (VectorDB).
+5. Impact analysis and test plan are generated and returned to the UI.
+6. User can visualize results, download reports as PDF, and continue the session with chat memory.
 
-Project Setup
--------------
+**Solution Diagram:**
+![High-Level Architecture](solution_diagram.png)
+
+---
+
+## Local Setup Instructions
+
+### Prerequisites
+- Java 11+ (on PATH)
+- Node.js & npm (for frontend)
+- Git (for repo cloning)
+- (Optional) Google Cloud credentials for Vertex AI
+
+### Backend Setup
 1. **Clone the repository:**
    ```bash
    git clone <your-repo-url>
    cd impact-analyzer
    ```
 2. **Configure properties:**
-   - Edit `src/main/resources/application.properties` for backend settings.
-   - Key options: LLM provider, repo cloning, aggregation toggles.
-3. **Run backend:**
+   - Edit `src/main/resources/application.properties` as needed (LLM, repo, aggregation, etc.)
+3. **Build and run backend:**
    ```bat
    gradlew.bat build
    gradlew.bat bootRun
    ```
-4. **Run frontend:**
+   - Main class: `com.citi.impactanalyzer.ImpactAnalyzerApplication`
+   - Backend runs at: `http://localhost:8081` (default)
+
+### Frontend Setup
+For more detailed instructions, see [impact-analyzer-ui/README.md](impact-analyzer-ui/README.md).
+
+1. **Navigate to UI folder:**
    ```bash
    cd impact-analyzer-ui
    npm install
-   ng serve
    ```
-5. **Access APIs and UI:**
-   - Backend: `http://localhost:8080`
-   - Frontend: `http://localhost:4200`
+2. **Run the frontend:**
+   ```bash
+   ng serve --open
+   ```
+   - UI runs at: `http://localhost:4200`
 
-Evaluation Tips
----------------
-- Demonstrate impact analysis by posting prompts to `/promptAnalyzer/impactedModules`.
-- Show test plan generation via `/promptAnalyzer/testPlan`.
-- Visualize the dependency graph in the Angular UI.
-- Highlight AI integration and configuration flexibility.
-
-For more details, see the full documentation below.
-
-What this project does
-----------------------
-Impact Analyzer builds a dependency graph for a codebase by scanning source files, calling an LLM-based analyser to extract dependencies, writing a JSON dependency graph, and loading that JSON into an in-memory graph for traversal and visualization.
-
-Quick status
-------------
-- Dependency aggregation (scan -> LLM -> JSON) is implemented in `com.citi.impactanalyzer.parser.service.DependencyAggregationService` and is invoked at startup by `com.citi.impactanalyzer.parser.init.DependencyAggregationInitializer` by default.
-- The in-memory graph is represented by `com.citi.impactanalyzer.graph.domain.DependencyGraph` and populated by `GraphService.buildGraphFromJson(File)` after the JSON is generated.
-- The HTTP API exposes endpoints under `/graph` (see `GraphTraversalController`).
-- Impact analysis and prompt-based queries are handled by the analyzer package:
-  - `com.citi.impactanalyzer.analyzer.service.PromptAnalysisService` provides core logic for prompt analysis and test plan generation.
-  - `com.citi.impactanalyzer.analyzer.controller.PromptAnalysisController` exposes REST endpoints for impact analysis and test plan generation under `/promptAnalyzer`.
-- The frontend UI is built with Angular and communicates with the backend APIs for graph visualization and impact analysis.
-- AI integration is achieved using LangChain4j and Vertex AI for advanced code analysis and prompt handling.
-
-Quick local setup (for new developers)
--------------------------------------
-This section gives a minimal, practical set of steps so a new developer can run the project locally and iterate quickly.
-
-Prerequisites
-- Java 11+ installed and available on PATH.
-- Git (optional, used if you enable automatic cloning).
-- (Optional) Access to an LLM provider if you want to run the real LLM-based dependency extraction. If you don't have LLM access, you can disable aggregation and place a pre-generated JSON in `build/analysis/dependency-graph.json`.
-- If you use Vertex AI or other Google Cloud services locally, set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to point to your service account JSON key file.
-   - Create or download a JSON key for a service account with the required Vertex AI permissions and save it somewhere secure on your machine (example: `C:\keys\vertex-key.json` or `/home/user/.keys/vertex-key.json`).
-   - Windows GUI ("Edit environment variable for your account")
-     - Variable name: GOOGLE_APPLICATION_CREDENTIALS
-     - Variable value: C:\keys\vertex-key.json
-
-1) Clone the repo (if you haven't already)
-
-```bash
-git clone <your-repo-url>
-cd impact-analyzer
-```
-
-2) Inspect / tune properties
-- Open `src/main/resources/application.properties`. Defaults are provided for the analyzer settings (see `analyzer.*` keys).
-- Key properties you may want to change for local development:
-  - `analyzer.clone-enabled` (default: false) — enable to auto-clone the configured repo on startup.
-  - `analyzer.clone-repo-url` / `analyzer.clone-branch` / `analyzer.clone-local-path` — repository settings for cloning.
-  - `analyzer.base-package` — the project's base package used in LLM prompts (set to your codebase root package for best results).
-  - `analyzer.dependency-aggregation-async` — true to run aggregation in background and let the app start immediately; false to block until aggregation completes.
-
-3) (Optional) Enable cloning and run
-- To let the app clone a sample repo on startup (useful for first-time runs), set `analyzer.clone-enabled=true` in `application.properties` or pass it on the command line (example below).
-
-4) Run the app using Gradle wrapper (Windows cmd.exe)
-
-Run with defaults (no cloning unless enabled in properties):
-
-```bat
-cd "C:\Users\IdeaProjects\impact-analyzer"
-gradlew.bat build
-gradlew.bat bootRun
-```
-
-Run and enable cloning via command-line args (one-liner):
-
-```bat
-gradlew.bat bootRun --args="--analyzer.clone-enabled=true --analyzer.clone-repo-url=https://github.com/your-org/your-repo --analyzer.dependency-aggregation-async=false"
-```
-
-If you want to disable aggregation (for example, when you don't have an LLM configured):
-
-```bat
-gradlew.bat bootRun --args="--analyzer.dependency-aggregation-enabled=false"
-```
-
-5) What to expect on startup
-- If cloning is enabled, the configured repo will be cloned/pulled into `build/cloneRepo` (configurable).
-- If aggregation is enabled, the application will scan files, call the LLM for dependency extraction, write `build/analysis/dependency-graph.json`, and then load that JSON into the in-memory graph.
-- If `analyzer.dependency-aggregation-async=true` the app will start while aggregation runs in the background. If false, startup will wait for aggregation to finish.
-
-6) Inspect outputs and use the API
-- **Generated Outputs:**
-  - Dependency graph JSON: `build/analysis/dependency-graph.json`
-  - NGX graph JSON for Impacted modules: Generated dynamically via the `/promptAnalyzer/impactedModules` endpoint.
-
-- **API Endpoints:**
-  - **Analyze Impacted Modules and Generate Test Plan:**
-    - **Endpoint:** `/promptAnalyzer/impactedModules`
-    - **Method:** `POST`
-    - **Parameters:**
-      - `sessionId` (query param): Unique session identifier.
-      - `prompt` (body): The textual prompt to analyze.
-    - **Response:** JSON object containing impacted modules and test plans.
-
-- **Example Usage:**
+#### Additional Frontend Commands
+- **Build the UI:**
   ```bash
-  curl -X POST "http://localhost:8080/promptAnalyzer/impactedModules?sessionId=12345" \
+  ng build
+  ```
+  - Compiles the project and stores build artifacts in the `dist/` directory.
+  - Production builds are optimized for performance and speed.
+
+- **Code Scaffolding:**
+  Generate a new component:
+  ```bash
+  ng generate component component-name
+  ```
+  For a full list of schematics (components, directives, pipes, etc.):
+  ```bash
+  ng generate --help
+  ```
+
+- **Running Unit Tests:**
+  ```bash
+  ng test
+  ```
+  - Executes unit tests with the [Karma](https://karma-runner.github.io) test runner.
+
+- **Running End-to-End (E2E) Tests:**
+  ```bash
+  ng e2e
+  ```
+  - Angular CLI does not include an e2e framework by default; you may choose one that fits your needs.
+
+- **More Resources:**
+  See the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) for more details.
+
+---
+
+## Vertex AI Setup Instructions
+To enable Vertex AI integration for LLM-powered analysis:
+
+1. **Google Cloud Account:**
+   - Ensure you have a Google Cloud account with Vertex AI enabled.
+
+2. **Create a Service Account:**
+   - Go to the [Google Cloud Console](https://console.cloud.google.com/).
+   - Navigate to IAM & Admin > Service Accounts.
+   - Create a new service account with the Vertex AI User role (and any other required permissions).
+   - Generate and download a JSON key for this service account.
+
+3. **Set Environment Variable:**
+   - On your development machine, set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your service account JSON key.
+   - **Windows (PowerShell):**
+     ```powershell
+     $env:GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\vertex-key.json"
+     ```
+   - **Windows (System Environment Variable):**
+     - Open System Properties > Environment Variables.
+     - Add a new user or system variable:
+       - Name: `GOOGLE_APPLICATION_CREDENTIALS`
+       - Value: `C:\path\to\vertex-key.json`
+   - **Linux/macOS:**
+     ```bash
+     export GOOGLE_APPLICATION_CREDENTIALS="/path/to/vertex-key.json"
+     ```
+
+4. **Configure application.properties:**
+   - Set the relevant analyzer properties for Vertex AI in `src/main/resources/application.properties`:
+     ```properties
+     analyzer.llm-provider=vertexai
+     analyzer.vertexai.project-id=<your-gcp-project-id>
+     analyzer.vertexai.location=<vertexai-region>
+     analyzer.vertexai.model=<vertexai-model-name>
+     # Example: analyzer.vertexai.model=text-bison
+     ```
+
+5. **Test the Integration:**
+   - Start the backend and trigger an analysis. Check logs for successful Vertex AI calls.
+   - Troubleshoot authentication or permission errors as needed.
+
+---
+
+## Usage Guide
+- **API Endpoints:**
+  - `POST /promptAnalyzer/impactedModules` — Analyze impact of a prompt
+  - `POST /promptAnalyzer/testPlan` — Generate test plan for impacted modules
+  - `GET /graph` — Retrieve dependency graph
+- **Example (Impact Analysis):**
+  ```bash
+  curl -X POST "http://localhost:8081/promptAnalyzer/impactedModules?sessionId=12345" \
        -H "Content-Type: application/json" \
        -d '{"prompt": "Analyze the impact of changing ServiceA"}'
   ```
+- **UI:**
+  - Access `http://localhost:4200` for interactive graph visualization and prompt-driven analysis.
 
-Troubleshooting
-- If the app fails at the LLM call step:
-  - Disable aggregation temporarily: `--analyzer.dependency-aggregation-enabled=false` and restart.
-  - Alternatively, add a dependency JSON at `build/analysis/dependency-graph.json` and restart; the GraphService will load it.
-- If cloning fails due to network or authentication problems, set `analyzer.clone-enabled=false` and clone the repo manually outside the app into the configured `analyzer.clone-local-path`.
-- If files are skipped by the scanner, check `analyzer.file-scanner-excludes` and `analyzer.file-scanner-max-file-size-bytes` settings.
+---
 
-Development tips
-- Run in your IDE: open the project and run `com.citi.impactanalyzer.ImpactAnalyzerApplication`.
-- For debugging LLM prompts, set `analyzer.dependency-aggregation-enabled=false` and call `PromptService` methods from unit tests or a small main to inspect raw outputs before sanitization.
-- To avoid costs while iterating, keep `analyzer.dependency-aggregation-enabled=false` and work with a static `dependency-graph.json` sample.
+## Contribution Guidelines
+- Fork the repo and create feature branches (`feature/<name>`)
+- Follow Java and Angular style guides
+- Write unit/integration tests for new features
+- Submit pull requests with clear descriptions
+- Use conventional commit messages
 
-Configuration (where to change things)
-- `src/main/resources/application.properties` (defaults and example values)
-- Per-environment overrides: consider creating `application-dev.properties` and `application-prod.properties` and setting profiles.
+---
 
-Where to look in the code
----------------------
-- **Graph Service:**
-  - `com.citi.impactanalyzer.graph.service.GraphService`
-    - Provides methods to retrieve impacted modules and manage the dependency graph.
+## License
+This project is licensed under the Apache 2.0 License. See [LICENSE.txt](./build/cloneRepo/LICENSE.txt) for details.
 
-- **Graph Domain:**
-  - `com.citi.impactanalyzer.graph.domain.NgxGraphResponse`
-    - Represents the structure of the graph response, including nodes, links, and test plans.
+---
 
-- Parser / aggregation:
-  - `com.citi.impactanalyzer.parser.clone.RepositoryCloneService` (optional, opt-in clone)
-  - `com.citi.impactanalyzer.parser.service.CodeFileScannerService` (file discovery & reading)
-  - `com.citi.impactanalyzer.parser.service.PromptService` (builds prompts)
-  - `com.citi.impactanalyzer.parser.service.ChatClientService` (centralized chat client calls, retries)
-  - `com.citi.impactanalyzer.parser.service.DependencyAggregationService` (aggregates dependencies & writes JSON)
-  - `com.citi.impactanalyzer.parser.service.DependencyExtractionService` (validates and forwards content to LLM/prompt service)
-  - `com.citi.impactanalyzer.parser.init.DependencyAggregationInitializer` (startup orchestration)
+## Team & Contact
+**Team Name:** Market Solution Sculptors
 
-- Prompt Analyser   
-- **Prompt Analysis Controller:**
-    - `com.citi.impactanalyzer.analyzer.controller.PromptAnalysisController`
-      - Exposes REST API endpoints for analyzing impacted modules and generating test plans.
-      - Coordinates with `PromptAnalysisService` and `GraphService` to process requests.
+Bhargavi Sivasankari — Team Member  
+Janani R — Team Member  
+Rohini Ravi — Team Member  
+Kavitha M — Team Member  
+Lakshmi Suryanarayanan — Team Member
 
-  **Prompt Analysis Service:**
-    - `com.citi.impactanalyzer.analyzer.service.PromptAnalysisService`
-      - Handles the core logic for analyzing prompts and identifying impacted modules.
-      - Integrates with the dependency graph and test plan generation.
+---
+
+## Troubleshooting
+- If LLM calls fail, disable aggregation and use a static dependency graph JSON.
+- If cloning fails, set `analyzer.clone-enabled=false` and clone manually.
+- For environment issues, check Java, Node.js, and credentials.
+
+---
+
+## Extensibility & Future Features
+This MVP is designed for extensibility. Potential future enhancements, prioritized for maximum enterprise and user impact, include:
+
+- Integrate SSO authentication for the UI for secure, seamless access.
+- Implement secure session management with automatic expiry to protect user sessions and data.
+- Store chat memory per session for continuity and better user experience.
+- Support webhook-based code change detection to trigger analysis automatically on code changes.
+- Support on-demand code sync and re-scanning, allowing users to manually sync and re-scan codebases as needed.
+- Implement incremental re-embedding of modified files for efficient updates.
+- Auto-rebuild dependency graph when code updates occur to keep analysis up-to-date.
+- Support more repository providers (GitHub, GitLab, Bitbucket, Azure) for broader integration.
+- Support multiple repositories per project to analyze dependencies across several repositories.
+- Add support for more programming languages/frameworks to expand analysis coverage.
+- Provide flexible UI layout (dark mode, resizable panels) for enhanced user experience.
+- Add on-click “Open in Repository” navigation for each graph node for quick code access.
+- Add interactive graph controls (zoom, filter, search) to improve usability.
+- Add user search history and recent analyses panel for quick access to past queries.
+- Add configurable settings panel (model, temperature, language) for user customization.
+- Store analysis history in a backend database for audit and review.
+- Add ability to email or share analysis reports for collaboration and reporting.
+- Provide a dashboard for past analyses and trends to visualize historical data and insights.
+
+---
+
+## Acknowledgements
+- Spring Boot, Angular, Vertex AI, LangChain4j, and the open-source community.
