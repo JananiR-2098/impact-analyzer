@@ -74,4 +74,26 @@ export class Graph implements OnChanges {
   context.font = "14px Arial";  // match <text> style
   return context.measureText(label).width;
 }
+
+onNodeHover(node: any) {
+  node.data = node.data || {};
+  node.data.hover = true;
+
+  // highlight connected links
+  this.links.forEach(link => {
+    link.data = link.data || {};
+    if (link.source === node.id || link.target === node.id) {
+      link.data.hover = true;
+    }
+  });
+}
+
+onNodeLeave(node: any) {
+  node.data.hover = false;
+
+  // remove highlight from all links
+  this.links.forEach(link => {
+    if (link.data) link.data.hover = false;
+  });
+}
 }

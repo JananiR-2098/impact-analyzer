@@ -12,19 +12,23 @@
 
   <!-- Node Template -->
   <ng-template #nodeTemplate let-node>
-     <svg:g>
+     <svg:g class="graph-node"
+         (mouseenter)="onNodeHover(node)"
+         (mouseleave)="onNodeLeave(node)">
         <rect
             [attr.width]="node.data?.textWidth + 20"
             [attr.height]="30"
             rx="15"
             ry="15"
             [attr.fill]="node.data?.critical ? '#d9534f' : '#3f51b5'"
+             stroke="#000"
+            [attr.stroke-width]="node.data?.hover ? 2 : 0"
         ></rect>
 
       <text
             x="10"
             y="20"
-            fill="black"
+            fill="white"
             style="font-size: 14px; font-family: Arial;"
         >
             {{ node.label }}
@@ -39,6 +43,8 @@
         [attr.d]="link.line"
         stroke="#888"
         stroke-width="2"
+        [attr.stroke]="link.data?.hover ? '#ff9800' : '#888'"
+        [attr.stroke-width]="link.data?.hover ? 3 : 2"
         fill="none">
       </svg:path>
 
