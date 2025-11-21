@@ -13,7 +13,7 @@
     <div class="analysis-outputs">
 
       <div class="output output-graph">
-        <div class="output-title">Graph</div>
+        <div class="output-title">Impacted Files and Code Flow</div>
           <div *ngIf="graphData && graphData.length > 1">
             <button mat-raised-button *ngFor="let g of graphData; let i = index" (click)="selectedGraph = g">
              Graph {{ i + 1 }}
@@ -26,7 +26,7 @@
       </div>
 
       <div class="output output-testplan">
-        <div class="output-title">Test Plan</div>
+        <div class="output-title">Test Plan Overview</div>
         <div class="output-content" [innerHTML]="testPlanHtml"></div>
       </div>
     </div>
