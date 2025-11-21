@@ -83,7 +83,7 @@ Project Setup
    ng serve
    ```
 5. **Access APIs and UI:**
-   - Backend: `http://localhost:8080`
+   - Backend: `http://localhost:8081`
    - Frontend: `http://localhost:4200`
 
 Evaluation Tips
@@ -185,7 +185,7 @@ gradlew.bat bootRun --args="--analyzer.dependency-aggregation-enabled=false"
 
 - **Example Usage:**
   ```bash
-  curl -X POST "http://localhost:8080/promptAnalyzer/impactedModules?sessionId=12345" \
+  curl -X POST "http://localhost:8081/promptAnalyzer/impactedModules?sessionId=12345" \
        -H "Content-Type: application/json" \
        -d '{"prompt": "Analyze the impact of changing ServiceA"}'
   ```
