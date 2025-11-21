@@ -1,4 +1,11 @@
 <div class="graph-container no-edit">
+  @if(tooltip.visible){
+  <div class="svg-tooltip" 
+     [style.left.px]="tooltip.x"
+     [style.top.px]="tooltip.y">
+  {{ tooltip.text }}
+</div>
+  }
 
 <ngx-graph
   class="graph-container"
@@ -13,7 +20,8 @@
   <!-- Node Template -->
   <ng-template #nodeTemplate let-node>
      <svg:g class="graph-node"
-         (mouseenter)="onNodeHover(node)"
+         (mouseenter)="onNodeHover(node, $event)"
+         (mousemove)="onNodeHoverId($event, node)"
          (mouseleave)="onNodeLeave(node)">
         <rect
             [attr.width]="node.data?.textWidth + 20"
