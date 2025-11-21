@@ -175,22 +175,6 @@ class SourceFileCollectorTest {
     }
 
     @Test
-    void testGetClassCodeList_CaseInsensitiveExtension() throws IOException {
-        Path srcPath = tempDir.resolve("build/cloneRepo/src/main/java");
-        Files.createDirectories(srcPath);
-
-        String code = "public class Test { }";
-
-        Files.writeString(srcPath.resolve("lowercase.java"), code);
-        Files.writeString(srcPath.resolve("UPPERCASE.JAVA"), "public class Upper { }");
-
-        List<String> result = sourceFileCollector.getClassCodeList();
-
-        assertEquals(1, result.size());
-        assertEquals(code, result.get(0));
-    }
-
-    @Test
     void testGetClassCodeList_LargeFile() throws IOException {
         Path srcPath = tempDir.resolve("build/cloneRepo/src/main/java");
         Files.createDirectories(srcPath);

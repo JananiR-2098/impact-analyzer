@@ -43,18 +43,21 @@ class DependencyAggregationServiceTest {
     DependencyAnalyzerProperties properties;
     @Mock
     ObjectWriter objectWriter;
+    @Mock
+    BasePackageDetectorService basePackageDetector;
 
     @InjectMocks
     DependencyAggregationService aggregationService;
 
     @BeforeEach
     void setUp() throws Exception {
-        when(mapper.writerWithDefaultPrettyPrinter()).thenReturn(objectWriter);
-        doNothing().when(objectWriter).writeValue(any(FileWriter.class), any());
-        when(properties.getBaseDir()).thenReturn(tempDir.toString());
-        when(properties.getLanguages()).thenReturn(List.of("java"));
-        when(properties.getSqlDialects()).thenReturn(List.of("mysql"));
-        when(properties.getPathForLanguage(anyString())).thenReturn("src");
+        org.mockito.Mockito.lenient().when(mapper.writerWithDefaultPrettyPrinter()).thenReturn(objectWriter);
+        org.mockito.Mockito.lenient().doNothing().when(objectWriter).writeValue(any(FileWriter.class), any());
+        org.mockito.Mockito.lenient().when(properties.getBaseDir()).thenReturn(tempDir.toString());
+        org.mockito.Mockito.lenient().when(properties.getLanguages()).thenReturn(List.of("java"));
+        org.mockito.Mockito.lenient().when(properties.getSqlDialects()).thenReturn(List.of("mysql"));
+        org.mockito.Mockito.lenient().when(properties.getPathForLanguage(anyString())).thenReturn("src");
+        org.mockito.Mockito.lenient().when(basePackageDetector.detectBasePackage(any())).thenReturn("com.example");
     }
 
     private CodeFile createCodeFile(String content, String lang, Type type, String dialect) {

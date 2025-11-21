@@ -17,7 +17,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CodeFileScannerServiceTest {
@@ -36,8 +35,8 @@ class CodeFileScannerServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(properties.getFileScannerMaxFileSizeBytes()).thenReturn(MAX_SIZE);
-        when(properties.getFileScannerExcludes()).thenReturn(List.of("target", ".git", "node_modules"));
+        org.mockito.Mockito.lenient().when(properties.getFileScannerMaxFileSizeBytes()).thenReturn(MAX_SIZE);
+        org.mockito.Mockito.lenient().when(properties.getFileScannerExcludes()).thenReturn(List.of("target", ".git", "node_modules"));
     }
 
     private void createFile(Path dir, String name, String content) throws IOException {

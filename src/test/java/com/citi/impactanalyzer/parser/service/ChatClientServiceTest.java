@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Answers;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.client.ChatClient;
 
@@ -17,7 +19,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ChatClientServiceTest {
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     ChatClient chatClient;
     @Mock
     DependencyAnalyzerProperties properties;
@@ -29,19 +31,13 @@ class ChatClientServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(properties.getChatRetryCount()).thenReturn(2);
-        when(properties.getChatRetryDelayMs()).thenReturn(10L);
+        // lenient because not every test asserts retry behavior
+        Mockito.lenient().when(properties.getChatRetryCount()).thenReturn(2);
+        Mockito.lenient().when(properties.getChatRetryDelayMs()).thenReturn(10L);
     }
 
     @Test
     void testSendPrompt_SuccessOnFirstAttempt() {
-        chatClientService.sendPrompt(TEST_PROMPT);
-
-        verify(chatClient, times(1)).prompt();
-    }
-
-    @Test
-    void testSendPrompt_SuccessAfterRetries() {
         chatClientService.sendPrompt(TEST_PROMPT);
 
         verify(chatClient, times(1)).prompt();
@@ -75,4 +71,3 @@ class ChatClientServiceTest {
         verify(chatClient, times(1)).prompt();
     }
 }
-

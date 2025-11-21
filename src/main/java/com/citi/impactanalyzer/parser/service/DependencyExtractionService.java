@@ -19,7 +19,7 @@ public class DependencyExtractionService {
         if (!properties.getLanguages().contains(language)) {
             throw new IllegalArgumentException("Unsupported language: " + language);
         }
-        return promptService.analyzeAndGroupCodeDependencies(code, language);
+        return promptService.analyzeCodeDependencies(code, language);
     }
 
     public String analyzeSqlDependencies(String sql, String dialect) {

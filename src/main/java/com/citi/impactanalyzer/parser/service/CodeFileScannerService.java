@@ -52,17 +52,11 @@ public class CodeFileScannerService {
 
                             String content = readFileSafely(file);
 
-                            String contentType = Files.probeContentType(file);
-                            if (contentType != null && !contentType.startsWith("text")) {
-                                logger.debug("Skipping non-text file {} of type {}", file, contentType);
-                                return;
-                            }
-
-                            if (isCodeFile(file)) {
+                             if (isCodeFile(file)) {
                                 String language = detectLanguage(file);
                                 codeFiles.add(new CodeFile(CodeFile.Type.CODE, language, content, null));
                             } else if (isSqlFile(file)) {
-                                String dialect = detectSqlDialect(file, content);
+                                String dialect = detectSqlDialect(content);
                                 codeFiles.add(new CodeFile(CodeFile.Type.SQL, null, content, dialect));
                             }
 
@@ -103,7 +97,7 @@ public class CodeFileScannerService {
         return "unknown";
     }
 
-    private String detectSqlDialect(Path file, String content) {
+    private String detectSqlDialect(String content) {
         // Very naive detection; improve as needed
         String lower = content.toLowerCase();
         if (lower.contains("oracle")) return "oracle";
@@ -111,4 +105,3 @@ public class CodeFileScannerService {
         return "unknown";
     }
 }
-

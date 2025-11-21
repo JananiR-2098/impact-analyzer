@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 public class RepositoryCloneService {
 
     private static final Logger logger = LoggerFactory.getLogger(RepositoryCloneService.class);
+    private static final int MAX_ATTEMPTS = 3;
 
     private final DependencyAnalyzerProperties properties;
 
@@ -25,67 +26,91 @@ public class RepositoryCloneService {
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         if (!properties.isCloneEnabled()) {
             logger.info("Repository clone disabled via configuration (analyzer.clone-enabled=false)");
             return;
         }
 
         String repoUrl = properties.getCloneRepoUrl();
-        String branch = properties.getCloneBranch();
         File repoDir = new File(properties.getCloneLocalPath());
 
-        int attempts = 0;
-        int maxAttempts = 3;
-        while (attempts < maxAttempts) {
-            attempts++;
+        for (int attempts = 1; true; attempts++) {
             try {
-                if (repoDir.exists() && new File(repoDir, ".git").exists()) {
-                    try (Git git = Git.open(repoDir)) {
-                        String remoteUrl = git.getRepository().getConfig().getString("remote", "origin", "url");
-
-                        if (remoteUrl == null || remoteUrl.isEmpty()) {
-                            git.remoteAdd()
-                                    .setName("origin")
-                                    .setUri(new URIish(repoUrl))
-                                    .call();
-                        }
-
-                        logger.info("Pulling latest changes from {}", repoUrl);
-                        git.pull().call();
-                    }
+                if (isExistingRepository(repoDir)) {
+                    updateExistingRepo(repoDir, repoUrl);
                 } else {
-                    logger.info("Cloning repository from {} to {}", repoUrl, repoDir.getAbsolutePath());
-                    Git.cloneRepository()
-                            .setURI(repoUrl)
-                            .setBranch(branch)
-                            .setDirectory(repoDir)
-                            .call()
-                            .close();
-                    logger.info("Clone completed successfully");
+                    cloneNewRepo(repoDir, repoUrl, properties.getCloneBranch());
                 }
 
-                // success
-                break;
-
-            } catch (GitAPIException | IOException e) {
-                logger.error("Git operation failed on attempt {}/{}: {}", attempts, maxAttempts, e.getMessage());
-                if (attempts >= maxAttempts) {
-                    logger.error("Exceeded max clone attempts; continuing without cloned repo", e);
-                } else {
-                    try {
-                        Thread.sleep(1000L * attempts);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        logger.warn("Interrupted while waiting to retry clone");
-                        break;
-                    }
-                }
+                return;
             } catch (URISyntaxException e) {
                 logger.error("Invalid repository URL: {}", repoUrl, e);
-                break;
+                return;
+            } catch (GitAPIException | IOException e) {
+                handleGitFailure(attempts, repoUrl, e);
+                if (attempts >= MAX_ATTEMPTS) {
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean isExistingRepository(File repoDir) {
+        return repoDir.exists() && new File(repoDir, ".git").exists();
+    }
+
+
+    private void updateExistingRepo(File repoDir, String repoUrl) throws IOException, GitAPIException, URISyntaxException {
+        try (Git git = Git.open(repoDir)) {
+            String remoteUrl = git.getRepository().getConfig().getString("remote", "origin", "url");
+
+            if (remoteUrl == null || remoteUrl.isEmpty()) {
+                git.remoteAdd()
+                        .setName("origin")
+                        .setUri(new URIish(repoUrl))
+                        .call();
+            }
+
+            logger.info("Pulling latest changes from {}", repoUrl);
+            git.pull().call();
+        }
+    }
+
+
+    private void cloneNewRepo(File repoDir, String repoUrl, String branch) throws GitAPIException {
+        logger.info("Cloning repository from {} to {}", repoUrl, repoDir.getAbsolutePath());
+        Git.cloneRepository()
+                .setURI(repoUrl)
+                .setBranch(branch)
+                .setDirectory(repoDir)
+                .call()
+                .close();
+        logger.info("Clone completed successfully");
+    }
+
+
+    private void handleGitFailure(int attempts, String repoUrl, Exception e) {
+        logger.error("Git operation failed on attempt {}/{}: {}", attempts, MAX_ATTEMPTS, e.getMessage());
+
+        if (attempts >= MAX_ATTEMPTS) {
+            logger.error("Exceeded max clone attempts for {}; continuing without cloned repo", repoUrl, e);
+        } else {
+            try {
+
+                Thread.sleep(1000L * attempts);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                logger.warn("Interrupted while waiting to retry clone");
+                throw new RepositoryCloneException("Clone retry interrupted.", ie);
             }
         }
     }
 }
 
+
+class RepositoryCloneException extends RuntimeException {
+    public RepositoryCloneException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}

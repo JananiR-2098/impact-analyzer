@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,11 +25,17 @@ public class PromptAnalysisController {
     }
 
     @PostMapping("/impactedModules")
-    public ResponseEntity<?> getImpactedModules(@RequestParam String sessionId, @RequestBody String prompt) throws IOException {
+    public ResponseEntity<?> getImpactedModules(@RequestParam String sessionId, @RequestBody String prompt) {
         logger.info("Received request to analyze impacted modules for prompt: {}", prompt);
         List<String> nodes = promptAnalysisService.findNodeFromPrompt(sessionId, prompt);
         String testPlan = promptAnalysisService.getTestPlan(sessionId, prompt);
         Object impactedModules = graphService.getImpactedModulesNgx(nodes, testPlan);
         return ResponseEntity.ok(impactedModules);
+    }
+
+    @PostMapping("/testPlan")
+    public ResponseEntity<String> getTestPlan(@RequestParam String sessionId, @RequestBody String prompt) {
+        String testPlan = promptAnalysisService.getTestPlan(sessionId, prompt);
+        return ResponseEntity.ok(testPlan);
     }
 }
