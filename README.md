@@ -137,18 +137,7 @@ For more details, see [impact-analyzer-ui/README.md](impact-analyzer-ui/README.m
    ng test
    ```
 
-#### Additional Frontend Commands
-- **Code Scaffolding:**
-  ```powershell
-  ng generate component component-name
-  ```
-- **Running E2E Tests:**
-  ```powershell
-  ng e2e
-  ```
-- See [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) for more details.
 
----
 
 ## Vertex AI Setup Instructions
 To enable Vertex AI integration for LLM-powered analysis:
