@@ -34,8 +34,8 @@ public class PromptAnalysisService {
     private static final Logger logger = LoggerFactory.getLogger(PromptAnalysisService.class);
 
     private static final int MAX_RESULTS = 2;
-    private static final double MIN_SCORE = 0.6;
-    private static final int CHAT_MEMORY_SIZE = 10;
+    private static final double MIN_SCORE = 0.75;
+    private static final int CHAT_MEMORY_SIZE = 100;
 
     @Value("${graph.json.path}")
     private String graphJsonPath;
@@ -55,10 +55,6 @@ public class PromptAnalysisService {
     private final EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
 
 
-    // ----------------------------------------------------------------------
-    // Initialization
-    // ----------------------------------------------------------------------
-
     @PostConstruct
     public void init() throws IOException {
         logger.info("Initializing PromptAnalysisService...");
@@ -75,15 +71,16 @@ public class PromptAnalysisService {
         }
 
         JsonNode root = new ObjectMapper().readTree(jsonFile);
+        JsonNode dependencies = root.get("dependencies");
 
-        if (root == null || !root.isArray()) {
+        if (dependencies == null || !dependencies.isArray()) {
             logger.warn("Invalid graph JSON — expected top-level array.");
             return;
         }
 
         int count = 0;
 
-        for (JsonNode node : root) {
+        for (JsonNode node : dependencies) {
             if (!node.has("source")) continue;
 
             var id = node.path("source").asText(null);
@@ -166,16 +163,14 @@ public class PromptAnalysisService {
         return """
             You are an expert software architect and impact analyst.
             
-            You will receive:
-            1. A JSON object representing a Java project structure.
-            2. A user query describing a change request.
+            You will receive a user query describing a change request. %s
             
             Your task:
-            - Analyze the JSON structure.
-            - Understand the user request: '%s'
+            - Analyze the embedding store representing a Java project structure (packages, classes, methods, dependencies, etc.).
+            - Identify and return the relevant class names that will be impacted by the change request.
             - DO NOT invent class names.
             - Exclude test classes.
-            - Return only the class names(present in JSON also exclude package name) as plain text, separated by commas, with no explanation or additional formatting.
+            - Return only the class names(present in embedding store also exclude package name) as plain text, separated by commas, with no explanation or additional formatting.
             """.formatted(userPrompt);
     }
 

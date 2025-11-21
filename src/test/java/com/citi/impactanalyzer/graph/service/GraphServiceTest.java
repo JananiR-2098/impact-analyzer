@@ -1,106 +1,153 @@
 package com.citi.impactanalyzer.graph.service;
 
 import com.citi.impactanalyzer.graph.domain.DependencyGraph;
+import com.citi.impactanalyzer.graph.domain.EdgeMetadata;
 import com.citi.impactanalyzer.graph.domain.GraphNode;
+import com.citi.impactanalyzer.graph.domain.NgxGraphMultiResponse;
 import com.citi.impactanalyzer.parser.config.DependencyAnalyzerProperties;
 import com.citi.impactanalyzer.parser.service.DependencyAggregationService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class GraphServiceTest {
 
     @Mock
-    private DependencyGraph mockGraph;
-
+    DependencyAggregationService aggregationService;
     @Mock
-    private DependencyAggregationService mockAggregationService;
-
+    DependencyAnalyzerProperties analyzerProperties;
     @Mock
-    private DependencyAnalyzerProperties mockAnalyzerProperties;
+    DependencyGraph graph;
 
     @InjectMocks
-    private GraphService graphService;
+    GraphService graphService;
+
+    private final JsonNodeFactory factory = JsonNodeFactory.instance;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        ReflectionTestUtils.setField(graphService, "graphJsonPath", "test/path/graph.json");
     }
 
     @Test
-    @DisplayName("Returns graph when getGraph is called")
-    void returnsGraphWhenGetGraphIsCalled() {
-        assertNotNull(graphService.getGraph());
+    void testGetGraph_ReturnsInjectedGraph() {
+
+        assertSame(graph, graphService.getGraph(), "getGraph() should return the injected DependencyGraph instance.");
     }
 
     @Test
-    @DisplayName("Skips graph initialization when graphJsonPath is not configured")
-    void skipsGraphInitializationWhenGraphJsonPathIsNotConfigured() throws Exception {
-        when(mockAnalyzerProperties.isDependencyAggregationEnabled()).thenReturn(false);
+    void testInit_AggregationEnabled_Success() throws Exception {
+        when(analyzerProperties.isDependencyAggregationEnabled()).thenReturn(true);
+        ReflectionTestUtils.setField(graphService, "graphJsonPath", null);
         graphService.init();
-        verify(mockAggregationService, never()).generateDependencyGraph();
-        verify(mockGraph, never()).addDependency(anyString(), anyString());
+        verify(aggregationService, times(1)).generateDependencyGraph();
     }
 
     @Test
-    @DisplayName("Handles missing JSON file gracefully during initialization")
-    void handlesMissingJsonFileGracefullyDuringInitialization() throws Exception {
-        when(mockAnalyzerProperties.isDependencyAggregationEnabled()).thenReturn(false);
+    void testInit_AggregationDisabled() throws Exception {
+        when(analyzerProperties.isDependencyAggregationEnabled()).thenReturn(false);
+        ReflectionTestUtils.setField(graphService, "graphJsonPath", null);
         graphService.init();
-        File jsonFile = new File("nonexistent.json");
-        assertFalse(jsonFile.exists());
+        verify(aggregationService, never()).generateDependencyGraph();
     }
 
     @Test
-    @DisplayName("Builds graph from valid JSON input")
-    void buildsGraphFromValidJsonInput() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = "[{\"source\": \"A\", \"calls\": [\"B\"]}]";
-        JsonNode root = mapper.readTree(json);
+    void testBuildGraphFromJson_Format1_SourceRelationTarget() {
+        ArrayNode root = factory.arrayNode();
+        root.add(factory.objectNode()
+                .put("source", "A")
+                .put("relation", "CALLS")
+                .put("target", "B"));
 
         graphService.buildGraphFromJson(root);
 
-        verify(mockGraph).addDependency("A", "B");
+
+        verify(graph, times(1)).addDependency("A", "B");
     }
 
     @Test
-    @DisplayName("Skips vectorization when root JSON is null")
-    void skipsVectorizationWhenRootJsonIsNull() {
-        graphService.vectorizeGraphNodes(null);
-        verifyNoInteractions(mockGraph);
+    void testBuildGraphFromJson_Format2_FieldArrays() {
+        ArrayNode root = factory.arrayNode();
+        root.add(factory.objectNode()
+                .put("source", "A")
+                .set("CALLS", factory.arrayNode().add("B").add("C")));
+
+        graphService.buildGraphFromJson(root);
+
+        verify(graph).addDependency("A", "B");
+        verify(graph).addDependency("A", "C");
+        verify(graph, times(2)).addDependency(anyString(), anyString());
     }
 
-    @Nested
-    @DisplayName("getImpactedModulesNgx")
-    class GetImpactedModulesNgxTests {
+    @Test
+    void testBuildGraphFromJson_InvalidDataSkipped() {
+        ArrayNode root = factory.arrayNode();
+        root.add(factory.objectNode().put("source", "X").put("relation", "IMPORTS").put("target", ""));
+        root.add(factory.objectNode()
+                .put("source", "Y")
+                .set("CALLS", factory.arrayNode().add("Z").add("")));
 
-        @Test
-        @DisplayName("Returns bad request when nodes parameter is empty")
-        void returnsBadRequestWhenNodesParameterIsEmpty() {
-            var response = graphService.getImpactedModulesNgx(List.of(), "Test Plan");
-            assertEquals(400, ((ResponseEntity<?>) response).getStatusCodeValue());
-        }
+        root.add(factory.objectNode().put("source", "VALID").put("relation", "CALLS").put("target", "TARGET"));
 
-        @Test
-        @DisplayName("Returns 404 when no matching nodes are found")
-        void returns404WhenNoMatchingNodesAreFound() {
-            when(mockGraph.findNodes(anyString())).thenReturn(Set.of());
-            var response = graphService.getImpactedModulesNgx(List.of("NonExistentNode"), "Test Plan");
-            assertEquals(404, ((ResponseEntity<?>) response).getStatusCodeValue());
-        }
+        graphService.buildGraphFromJson(root);
+
+        verify(graph).addDependency("VALID", "TARGET");
+        verify(graph).addDependency("Y", "Z");
+        verify(graph, times(2)).addDependency(anyString(), anyString());
+    }
+
+    @Test
+    void testGetImpactedModulesNgx_NullOrEmptyNodes_ReturnsBadRequest() {
+        assertTrue(graphService.getImpactedModulesNgx(null, "TP").toString().contains("400 BAD_REQUEST"));
+        assertTrue(graphService.getImpactedModulesNgx(Collections.emptyList(), "TP").toString().contains("400 BAD_REQUEST"));
+    }
+
+    @Test
+    void testGetImpactedModulesNgx_NoMatchingNodesFound_Returns404() {
+
+        List<String> nodes = List.of("NonExistentNode");
+        when(graph.findNodes(anyString())).thenReturn(Collections.emptySet());
+
+        assertTrue(graphService.getImpactedModulesNgx(nodes, "TP").toString().contains("404 NOT_FOUND"));
+    }
+
+    @Test
+    void testGetImpactedModulesNgx_SingleNode_Success() {
+        String startName = "com.citi.ServiceA";
+        String impactedName = "com.citi.ModelB";
+        GraphNode startNode = mock(GraphNode.class);
+        GraphNode impactedNode = mock(GraphNode.class);
+
+        when(graph.findNodes(startName)).thenReturn(Set.of(startNode));
+        when(startNode.getName()).thenReturn(startName);
+        when(impactedNode.getName()).thenReturn(impactedName);
+        when(startNode.getDependencies()).thenReturn(Set.of(impactedNode));
+        when(impactedNode.getDependencies()).thenReturn(Collections.emptySet());
+        when(graph.getEdgeMetadata(startName, impactedName)).thenReturn(new EdgeMetadata());
+
+        Object response = graphService.getImpactedModulesNgx(List.of(startName), "TestPlan-1");
+
+        assertInstanceOf(NgxGraphMultiResponse.class, response);
+        NgxGraphMultiResponse ngxResponse = (NgxGraphMultiResponse) response;
+
+        assertEquals(1, ngxResponse.getGraphs().size());
+        assertEquals(2, ngxResponse.getGraphs().get(0).getNodes().size());
+        assertEquals(1, ngxResponse.getGraphs().get(0).getLinks().size());
+
     }
 }

@@ -26,23 +26,4 @@ public class GraphTraversalService {
         }
     }
 
-    public Set<String> traverseBFS(GraphNode start) {
-        Set<String> visited = new LinkedHashSet<>();
-        if (start == null) return visited;
-
-        Queue<GraphNode> queue = new LinkedList<>();
-        queue.add(start);
-
-        while (!queue.isEmpty()) {
-            GraphNode current = queue.poll();
-            if (!visited.contains(current.getName())) {
-                visited.add(current.getName());
-                if (current.getDependencies() != null) {
-                    queue.addAll(current.getDependencies());
-                }
-            }
-        }
-
-        return visited;
-    }
 }

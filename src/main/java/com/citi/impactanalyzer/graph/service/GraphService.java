@@ -10,10 +10,6 @@ import com.citi.impactanalyzer.graph.domain.GraphNode;
 import com.citi.impactanalyzer.parser.service.DependencyAggregationService;
 import com.citi.impactanalyzer.parser.config.DependencyAnalyzerProperties;
 
-import com.citi.impactanalyzer.vectorstore.JsonVectorizer;
-import com.citi.impactanalyzer.vectorstore.InMemoryVectorStore;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -37,12 +33,6 @@ public class GraphService {
 
     private final DependencyAggregationService aggregationService;
     private final DependencyAnalyzerProperties analyzerProperties;
-
-    @Autowired
-    private JsonVectorizer jsonVectorizer;
-
-    @Autowired
-    private InMemoryVectorStore vectorStore;
 
     public GraphService(
             DependencyGraph graph,
@@ -86,10 +76,10 @@ public class GraphService {
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(jsonFile);
+        JsonNode dependencies = root.get("dependencies");
 
-        buildGraphFromJson(root);
+        buildGraphFromJson(dependencies);
         computeEdgeCriticality();
-        vectorizeGraphNodes(root);
 
         for (GraphNode node : graph.getAllNodes()) {
             logger.debug("Loaded graph node: {}", node.getName());
@@ -157,38 +147,6 @@ public class GraphService {
         }
 
         logger.info("Finished building graph from JSON. Unique sources: {}, Total dependencies added: {}", uniqueSources.size(), totalDependencies);
-    }
-
-    public void vectorizeGraphNodes(JsonNode root) {
-        logger.info("Starting vectorization of graph nodes...");
-
-        if (root == null || !root.isArray()) {
-            logger.warn("Cannot vectorize: root JSON is not an array");
-            return;
-        }
-
-        int count = 0;
-        for (JsonNode node : root) {
-            if (!node.has("source"))
-                continue;
-
-            String id = node.get("source").asText();
-            if (id == null || id.isBlank())
-                continue;
-
-            try {
-                float[] vector = jsonVectorizer.vectorize(node);
-                vectorStore.save(id, vector);
-
-                logger.debug("Vector stored for {}", id);
-                count++;
-
-            } catch (Exception e) {
-                logger.error("Vectorization failed for node: {}", id, e);
-            }
-        }
-
-        logger.info("Vectorization complete. Total vectors stored: {}", count);
     }
 
     private void computeEdgeCriticality() {

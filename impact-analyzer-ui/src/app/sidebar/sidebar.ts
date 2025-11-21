@@ -47,6 +47,7 @@ export class SidebarComponent implements OnInit {
         } else {
           this.testPlanHtml = parsed as string;
         }
+
         console.log("Received panel data:", data);
         console.log("GRAPH:", this.graphData);
         console.log("GRAPH:", this.selectedGraph);

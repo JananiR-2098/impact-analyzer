@@ -4,10 +4,12 @@ import { InputPromptComponent } from './input-prompt/input-prompt.component';
 import { SidebarComponent } from './sidebar/sidebar';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { Sharedservice } from './services/sharedservice';
+import { LoaderComponent } from './loader/loader';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, InputPromptComponent, SidebarComponent, MatSidenavModule
+  imports: [RouterOutlet, InputPromptComponent, 
+    SidebarComponent, MatSidenavModule, LoaderComponent
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
