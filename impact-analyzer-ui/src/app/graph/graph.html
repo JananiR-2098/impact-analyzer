@@ -1,3 +1,5 @@
+<div class="graph-container no-edit">
+
 <ngx-graph
   class="graph-container"
   [nodes]="nodes"
@@ -10,23 +12,23 @@
 
   <!-- Node Template -->
   <ng-template #nodeTemplate let-node>
-    <svg:g>
-       <circle
-      [attr.r]="20"
-      [attr.cx]="20"
-      [attr.cy]="20"
-      [attr.fill]="node.data?.critical ? '#d9534f' : '#3f51b5'">
-    </circle>
+     <svg:g>
+        <rect
+            [attr.width]="node.data?.textWidth + 20"
+            [attr.height]="30"
+            rx="15"
+            ry="15"
+            [attr.fill]="node.data?.critical ? '#d9534f' : '#3f51b5'"
+        ></rect>
 
-
-      <svg:text
-        x="20"
-        y="25"
-        text-anchor="middle"
-        fill="white"
-        font-size="12">
-        {{ node.label }}
-      </svg:text>
+      <text
+            x="10"
+            y="20"
+            fill="black"
+            style="font-size: 14px; font-family: Arial;"
+        >
+            {{ node.label }}
+    </text>
     </svg:g>
   </ng-template>
 
@@ -47,3 +49,4 @@
   </ng-template>
 
 </ngx-graph>
+</div>
