@@ -2,6 +2,7 @@ package com.citi.impactanalyzer.graph.service;
 
 import com.citi.impactanalyzer.graph.domain.NgxGraphResponse;
 import com.citi.impactanalyzer.graph.domain.NgxGraphMultiResponse;
+import com.citi.impactanalyzer.parser.service.RepositoryCloneService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.citi.impactanalyzer.graph.domain.DependencyGraph;
@@ -35,15 +36,17 @@ public class GraphService {
 
     private final DependencyAggregationService aggregationService;
     private final DependencyAnalyzerProperties analyzerProperties;
+    RepositoryCloneService repositoryCloneService;
 
     public GraphService(
             DependencyGraph graph,
             DependencyAggregationService aggregationService,
-            DependencyAnalyzerProperties analyzerProperties
+            DependencyAnalyzerProperties analyzerProperties, RepositoryCloneService repositoryCloneService
     ) {
         this.graph = graph;
         this.aggregationService = aggregationService;
         this.analyzerProperties = analyzerProperties;
+        this.repositoryCloneService=repositoryCloneService;
     }
 
     public DependencyGraph getGraph() {
@@ -53,6 +56,9 @@ public class GraphService {
     @PostConstruct
     public void init() throws Exception {
         logger.info("GraphService init...");
+        logger.info("Cloning repo...");
+        repositoryCloneService.cloneRepo();
+        logger.info("Clone completed...");
 
         if (analyzerProperties.isDependencyAggregationEnabled()) {
             logger.info("Dependency aggregation is enabled - invoking aggregation from GraphService");
@@ -117,7 +123,7 @@ public class GraphService {
                     uniqueSources.add(source);
                     graph.addDependency(source, target);
                     totalDependencies++;
-                    logger.debug("Added dependency: {} --[{}]--> {}", source, relation, target);
+
                 }
                 continue;
             }
@@ -225,6 +231,7 @@ public class GraphService {
         if (graphs.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "No matching nodes found for: " + nodes));
         }
+        logger.info("graphs.size(): {}", graphs.size());
         return new NgxGraphMultiResponse(graphs, new NgxGraphMultiResponse.NgxTestPlan("Test Plan", testPlan),
                 new NgxGraphMultiResponse.NgxRepo("Repo", repoName ));
     }
