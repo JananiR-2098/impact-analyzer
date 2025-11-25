@@ -1,7 +1,6 @@
 package com.citi.impactanalyzer.parser.service;
 
 import com.citi.impactanalyzer.parser.config.DependencyAnalyzerProperties;
-import jakarta.annotation.PostConstruct;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.URIish;
@@ -25,8 +24,7 @@ public class RepositoryCloneService {
         this.properties = properties;
     }
 
-    @PostConstruct
-    public void init() {
+    public void cloneRepo() {
         if (!properties.isCloneEnabled()) {
             logger.info("Repository clone disabled via configuration (analyzer.clone-enabled=false)");
             return;
