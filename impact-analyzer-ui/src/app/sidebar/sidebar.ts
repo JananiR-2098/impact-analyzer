@@ -19,7 +19,7 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
   styleUrls: ['./sidebar.css'],
 })
 export class SidebarComponent implements OnInit {
-  selectedTab: 'graph' | 'testplan' = 'graph';
+  selectedTab: 'graph' | 'impactedfiles' | 'testplan' = 'graph';
   promptMessage: string = '';
   testPlan: string = '';
   graphData: GraphResponse[] = [];
