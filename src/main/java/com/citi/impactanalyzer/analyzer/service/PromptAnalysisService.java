@@ -154,8 +154,8 @@ public class PromptAnalysisService {
         return chatWithAssistant(sessionId, query);
     }
 
-    public String getTestPlan(String changeRequest, String sessionId, String nodes) throws IOException {
-        var prompt = buildTestPlanPrompt(changeRequest, nodes);
+    public String getTestPlan(String changeRequest, String sessionId, String impactedFileJson) throws IOException {
+        var prompt = buildTestPlanPrompt(changeRequest, impactedFileJson);
         return chatWithAssistant(sessionId, prompt);
     }
 
@@ -174,8 +174,8 @@ public class PromptAnalysisService {
                 """.formatted(userPrompt);
     }
 
-private String buildTestPlanPrompt(String changeRequest, String nodes) {
-return """
+    private String buildTestPlanPrompt(String changeRequest, String impactedFileJson) {
+        return """
             You are a software test plan generator.
             You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
             Analyse the repository structure, functionality, public methods, and potential risks.
