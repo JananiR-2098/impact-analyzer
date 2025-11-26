@@ -7,6 +7,7 @@
   width: 100%;
   height: 100%;
   min-height: 200px; /* allow absolutely positioned tooltip inside the container */
+  position: relative;
 }
 
 .no-edit svg {
@@ -32,4 +33,24 @@ svg path {
   z-index: 9999;
   white-space: nowrap;
   transform: none;
+}
+
+/* Loading overlay styles */
+.graph-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.85);
+  z-index: 2000;
+  pointer-events: none;
+}
+.graph-loading-overlay .graph-loader {
+  pointer-events: auto;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
 }

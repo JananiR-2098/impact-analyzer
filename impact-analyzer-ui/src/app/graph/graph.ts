@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, ViewChild, NgZone, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ViewChild, NgZone, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GraphResponse } from '../models/graph-response';
 import { NgxGraphModule, GraphComponent, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
@@ -14,7 +14,21 @@ import { curveLinear } from 'd3-shape';
   styleUrls: ['./graph.css'],
 })
 export class Graph implements OnChanges, OnInit, AfterViewInit, OnDestroy {
-  @Input() graph!: GraphResponse;
+  // use an input setter so we react immediately when parent assigns graph data
+  private _graph?: GraphResponse;
+  @Input()
+  set graph(value: GraphResponse | undefined) {
+    this._graph = value;
+    if (value) {
+      console.debug('Graph setter called - processing graph immediately');
+      // process immediately (safe to call even if view not ready)
+      try { this.processGraph(); } catch (e) { console.error('processGraph error in setter', e); }
+    }
+  }
+  get graph(): GraphResponse | undefined {
+    return this._graph;
+  }
+  @Input() loading: boolean = false;
   @ViewChild('graphRef', { static: false }) graphComponent!: GraphComponent;
 
   private fitRequested$ = new Subject<void>();
@@ -182,38 +196,57 @@ export class Graph implements OnChanges, OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnChanges() {
-    if (!this.graph) return;
+  ngOnChanges(changes: SimpleChanges) {
+    // If loading just finished and we already have graph data, process it now
+    if (changes['loading'] && changes['loading'].previousValue === true && this.loading === false) {
+      if (this.graph) this.processGraph();
+      return;
+    }
 
-    console.log('Graph data received:', this.graph);
+    // Normal graph input update
+    if (changes['graph'] && this.graph) {
+      this.processGraph();
+    }
+  }
 
-    this.nodes = this.graph.nodes.map((n) => ({
-      id: n.id,
-      label: n.label || n.id,
-      data: {
-        critical: n.critical ?? false,
-        textWidth: this.calculateTextWidth(n.label || ''),
-      },
-    }));
-
-    const nodeIds = new Set(this.nodes.map((n) => n.id));
-
-    this.links = this.graph.links
-      .filter((l) => nodeIds.has(l.source) && nodeIds.has(l.target))
-      .map((l) => ({
-        id: `${l.source}-${l.target}`,
-        source: l.source,
-        target: l.target,
-        label: l.label || 'depends',
+  private processGraph() {
+    try {
+      console.log('Graph data received:', this.graph);
+      const g = this.graph!;
+      if (!g || !g.nodes || !g.links) {
+        console.warn('Graph input missing nodes/links');
+        return;
+      }
+      this.nodes = g.nodes.map((n) => ({
+        id: n.id,
+        label: n.label || n.id,
         data: {
-          critical: l.critical,
-          color: l.critical ? 'red' : '#6a5acd',
-          width: l.critical ? 4 : 2,
+          critical: n.critical ?? false,
+          textWidth: this.calculateTextWidth(n.label || ''),
         },
       }));
 
-    // Request a fit when data changes
-    this.fitGraph();
+      const nodeIds = new Set(this.nodes.map((n) => n.id));
+
+      this.links = g.links
+        .filter((l) => nodeIds.has(l.source) && nodeIds.has(l.target))
+        .map((l) => ({
+          id: `${l.source}-${l.target}`,
+          source: l.source,
+          target: l.target,
+          label: l.label || 'depends',
+          data: {
+            critical: l.critical,
+            color: l.critical ? 'red' : '#6a5acd',
+            width: l.critical ? 4 : 2,
+          },
+        }));
+
+      // Request a fit when data changes
+      this.fitGraph();
+    } catch (e) {
+      console.error('processGraph failed', e);
+    }
   }
 
   ngOnInit() {
@@ -265,6 +298,12 @@ export class Graph implements OnChanges, OnInit, AfterViewInit, OnDestroy {
       }
     } catch (e) {
       console.debug('stateChange subscription failed', e);
+    }
+
+    // If graph data was already set before view init, ensure it's processed now.
+    if (this.graph && (!this.nodes || this.nodes.length === 0)) {
+      // run inside Angular so bindings update
+      this.processGraph();
     }
   }
 

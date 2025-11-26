@@ -3,6 +3,11 @@
     {{ tooltip.text }}
   </div>
 
+  <!-- Loading overlay shown while backend responses are pending -->
+  <div *ngIf="loading" class="graph-loading-overlay">
+    <div class="graph-loader">Loading graph…</div>
+  </div>
+
   <ngx-graph
     #graphRef
     class="graph-canvas"
