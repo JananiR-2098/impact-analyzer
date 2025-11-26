@@ -13,7 +13,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Chatservice } from '../services/chatservice';
 import { Sharedservice } from '../services/sharedservice';
 import { Message } from '../models/msg';
-import {PromptResponse} from "../models/prompt-response";
 
 @Component({
   selector: 'app-input-prompt',
@@ -90,10 +89,10 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
           this.messages.push({
             text: 'No impact found in repo.',
             sender: 'Mia',
-            timestamp: new Date()
-        });
-        this.shouldScrollToBottom = true;
-        this.chatService.getPromptResponse(v).subscribe({
+            timestamp: new Date(),
+          });
+          this.shouldScrollToBottom = true;
+          this.chatService.getPromptResponse(v).subscribe({
             next: (response: PromptResponse) => {
                 console.log("Received response from backend:", response);
                 const graphData = response?.graphs ?? [];
@@ -112,7 +111,8 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
                 this.messages.push({ text: 'No impact found in repo.', sender: 'Mia', timestamp: new Date() });
                 this.shouldScrollToBottom = true;
             }
-        });
+        },
+      );
     }
   }
 

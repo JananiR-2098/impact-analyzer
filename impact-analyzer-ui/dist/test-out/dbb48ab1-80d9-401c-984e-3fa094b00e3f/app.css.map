@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/app.css"],
+  "sourcesContent": [".container {\r\n  display: flex;\r\n  height: 100vh;\r\n  min-height: 100vh;\r\n}\r\n\r\n.app-header {\r\n  display: flex;\r\n  align-items: center;\r\n  justify-content: space-between;\r\n  padding: 10px 12px;\r\n  background: linear-gradient(90deg,#ff6b6b,#a855f7 60%);\r\n  color: white;\r\n}\r\n\r\n.app-header-title { font-weight: 600; }\r\n\r\n.left-section,\r\n.right-section {\r\n  flex: 1 1 50%;\r\n  min-width: 0;\r\n  display: flex;\r\n  flex-direction: column;\r\n}\r\n\r\n/*.right-section {\r\n\r\n  border-left: 1px solid rgba(15, 23, 42, 0.06);\r\n  background: #fff;\r\n}*/"],
+  "mappings": ";AAAA,CAAC;AACC,WAAS;AACT,UAAQ;AACR,cAAY;AACd;AAEA,CAAC;AACC,WAAS;AACT,eAAa;AACb,mBAAiB;AACjB,WAAS,KAAK;AACd;AAAA,IAAY;AAAA,MAAgB,KAAhB;AAAA,MAAsB,OAAtB;AAAA,MAA8B,QAAQ;AAClD,SAAO;AACT;AAEA,CAAC;AAAmB,eAAa;AAAK;AAEtC,CAAC;AACD,CAAC;AACC,QAAM,EAAE,EAAE;AACV,aAAW;AACX,WAAS;AACT,kBAAgB;AAClB;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/graph/graph.css"],
+  "sourcesContent": ["/* Prevent zoom, pan, drag, click \u2014 but still render SVG normally */\r\n.graph-container svg {\r\n  pointer-events: none !important;\r\n}\r\n\r\n/* Optional: Ensure graph sizing still works */\r\n.graph-container {\r\n  width: 100%;\r\n  height: 500px;\r\n}"],
+  "mappings": ";AACA,CAAC,gBAAgB;AACf,kBAAgB;AAClB;AAGA,CALC;AAMC,SAAO;AACP,UAAQ;AACV;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/services/sharedservice.ts"],
+  "sourcesContent": ["import { Injectable } from '@angular/core';\r\nimport { Subject } from 'rxjs';\r\nimport { GraphResponse } from '../models/graph-response';\r\nimport { Message } from '../models/msg';\r\n\r\n@Injectable({ providedIn: 'root' })\r\n\r\nexport class Sharedservice {\r\n  private panelDataSource = new Subject<any>();\r\n  panelData$ = this.panelDataSource.asObservable();\r\n\r\n  private panelOutputSource = new Subject<any>();\r\n  panelOutput$ = this.panelOutputSource.asObservable();\r\n\r\n  openPanelold(msg : Message[]) {\r\n    this.panelDataSource.next(msg);\r\n  }\r\n\r\n  openPanel(data: { graphData: GraphResponse[] , testPlan: string}) {\r\n    console.log(\"Shared Service - Opening panel with data:\", data);\r\n    this.panelDataSource.next(data);\r\n  }\r\n}\r\n"],
+  "mappings": ";;;;;;;;;;;;;IAOa;;;;;AAPb;AACA;AAMO,IAAM,gBAAN,MAAMA,eAAa;MAChB,kBAAkB,IAAI,QAAO;MACrC,aAAa,KAAK,gBAAgB,aAAY;MAEtC,oBAAoB,IAAI,QAAO;MACvC,eAAe,KAAK,kBAAkB,aAAY;MAElD,aAAa,KAAe;AAC1B,aAAK,gBAAgB,KAAK,GAAG;MAC/B;MAEA,UAAU,MAAsD;AAC9D,gBAAQ,IAAI,6CAA6C,IAAI;AAC7D,aAAK,gBAAgB,KAAK,IAAI;MAChC;;AAdW,oBAAa,WAAA;MAFzB,WAAW,EAAE,YAAY,OAAM,CAAE;OAErB,aAAa;;;",
+  "names": ["Sharedservice"]
+}

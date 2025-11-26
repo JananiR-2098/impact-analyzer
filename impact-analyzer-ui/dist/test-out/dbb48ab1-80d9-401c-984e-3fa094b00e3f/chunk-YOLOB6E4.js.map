@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/services/chatservice.ts"],
+  "sourcesContent": ["import { Injectable } from '@angular/core';\r\nimport { HttpClient } from '@angular/common/http';\r\nimport { Observable } from 'rxjs';\r\nimport { PromptResponse } from '../models/prompt-response';\r\n\r\n@Injectable({ providedIn: 'root' })\r\nexport class Chatservice {\r\n\r\n  private API_URL = 'http://localhost:8080/api/chat/impactanalyser';\r\n\r\n  constructor(private http: HttpClient) {}\r\n\r\n  sendToBackend(msg: string): Observable<any> {\r\n    return this.http.post(this.API_URL, { text: msg });\r\n  }\r\n\r\n  getPromptResponse(msg: string): Observable<PromptResponse> {\r\n    return this.http.post<PromptResponse>(this.API_URL+\"?sessionId=131242\", { text: msg });\r\n  }\r\n}\r\n"],
+  "mappings": ";;;;;;;;;;;;;;;IAMa;;;;;AANb;AACA;AAKO,IAAM,cAAN,MAAMA,aAAW;MAIF;MAFZ,UAAU;MAElB,YAAoB,MAAgB;AAAhB,aAAA,OAAA;MAAmB;MAEvC,cAAc,KAAW;AACvB,eAAO,KAAK,KAAK,KAAK,KAAK,SAAS,EAAE,MAAM,IAAG,CAAE;MACnD;MAEA,kBAAkB,KAAW;AAC3B,eAAO,KAAK,KAAK,KAAqB,KAAK,UAAQ,qBAAqB,EAAE,MAAM,IAAG,CAAE;MACvF;;;;;AAZW,kBAAW,WAAA;MADvB,WAAW,EAAE,YAAY,OAAM,CAAE;OACrB,WAAW;;;",
+  "names": ["Chatservice"]
+}
