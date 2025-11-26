@@ -6,7 +6,7 @@ import { WindowIdService } from '../services/window-id.service';
 
 @Injectable({ providedIn: 'root' })
 export class Chatservice {
-  private API_URL = 'http://localhost:8080/api/chat/impactanalyser';
+  private readonly API_URL = 'http://localhost:8081/promptAnalyzer/impactedModules'; // your backend endpoint
 
   constructor(private readonly http: HttpClient, private readonly windowIdService: WindowIdService) {}
 
