@@ -1,15 +1,15 @@
 <div class="graph-container no-edit">
-  @if(tooltip.visible){
-  <div class="svg-tooltip" [style.left.px]="tooltip.x" [style.top.px]="tooltip.y">
+  <div *ngIf="tooltip.visible" class="svg-tooltip" [style.left.px]="tooltip.x" [style.top.px]="tooltip.y">
     {{ tooltip.text }}
   </div>
-  }
 
   <ngx-graph
-    class="graph-container"
+    #graphRef
+    class="graph-canvas"
     [nodes]="nodes"
     [links]="links"
-    [layout]="'dagre'"
+    [layout]="layout"
+    [layoutSettings]="dagreSettings"
     [curve]="curve"
     (nodeClick)="onNodeClick($event)"
     (linkClick)="onLinkClick($event)"
