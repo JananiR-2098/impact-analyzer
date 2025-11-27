@@ -38,7 +38,7 @@ export class SidebarComponent implements OnInit {
         if (this.graphData && this.graphData.length > 0) {
           this.selectedGraph = this.graphData[0];
         }
-        this.reponame = data.reponame;
+        this.reponame = data.repoName;
 
         const parsed = marked.parse(this.testPlan || '');
         if (parsed instanceof Promise) {
