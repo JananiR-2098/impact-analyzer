@@ -25,17 +25,22 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class PromptAnalysisService {
 
     private static final Logger logger = LoggerFactory.getLogger(PromptAnalysisService.class);
 
-    private static final int MAX_RESULTS = 2;
+    // Increased max results for better context retrieval for complex analysis
+    private static final int MAX_RESULTS = 20;
     private static final double MIN_SCORE = 0.75;
     private static final int CHAT_MEMORY_SIZE = 100;
+
+    // Pattern to aggressively match and extract the JSON content inside the markdown code block.
+    // It captures content between ```json and ```, non-greedily.
+    private static final Pattern JSON_BLOCK_PATTERN = Pattern.compile("```json\\s*([\\s\\S]*?)\\s*```", Pattern.CASE_INSENSITIVE);
 
     @Value("${graph.json.path}")
     private String graphJsonPath;
@@ -87,6 +92,7 @@ public class PromptAnalysisService {
             if (id == null || id.isBlank()) continue;
 
             try {
+                // Storing the entire dependency node JSON as the text segment
                 var text = node.toString();
                 TextSegment segment = TextSegment.from(text);
                 Embedding embedding = embeddingModel.embed(text).content();
@@ -141,67 +147,110 @@ public class PromptAnalysisService {
                 .build();
     }
 
-    public List<String> findNodeFromPrompt(String sessionId, String userPrompt) {
-        var prompt = buildImpactAnalysisPrompt(userPrompt);
+    /**
+     * Generates a comprehensive impact analysis report, including an impacted dependency graph,
+     * a corresponding test plan, and repository identification, in a unified JSON format.
+     *
+     * @param sessionId The unique ID for chat memory.
+     * @param changeRequest The user's prompt describing the change.
+     * @return A JSON string containing the 'graphs' array, 'testPlan' object, and 'repo' object.
+     */
+    public String generateImpactAnalysisReport(String sessionId, String changeRequest) {
+        var prompt = buildGraphAndTestPlanPrompt(changeRequest);
         var assistantResponse = chatWithAssistant(sessionId, prompt);
-        logger.info("User Query: {}", userPrompt);
+        logger.info("User Change Request: {}", changeRequest);
         logger.info("Assistant Response: {}", assistantResponse);
-        return extractClassList(assistantResponse);
+        // The chatWithAssistant now ensures the output is only the clean JSON block.
+        return assistantResponse;
     }
 
-    public String getTestPlan(String sessionId, String prompt) {
-        var query = "Analyze and provide test plan for: " + prompt;
-        return chatWithAssistant(sessionId, query);
-    }
-
-    public String getTestPlan(String changeRequest, String sessionId, String nodes) throws IOException {
-        var prompt = buildTestPlanPrompt(changeRequest, nodes);
-        return chatWithAssistant(sessionId, prompt);
-    }
-
-    private String buildImpactAnalysisPrompt(String userPrompt) {
+    private String buildGraphAndTestPlanPrompt(String userPrompt) {
+        // Updated prompt instructions for accurate repository identification and the requested nested 'repo' object format.
         return """
-                You are an expert software architect and impact analyst.
+                You are an expert software architect, impact analyst, and test plan generator.
                 
-                You will receive a user query describing a change request. %s
+                You will receive a user query describing a change request: "%s"
                 
-                Your task:
-                - Analyze the embedding store representing a Java project structure (packages, classes, methods, dependencies, etc.).
-                - Identify and return the relevant class names that will be impacted by the change request.
-                - DO NOT invent class names.
-                - Exclude test classes.
-                - Return only the class names(present in embedding store also exclude package name) as plain text, separated by commas, with no explanation or additional formatting.
+                Your task is a three-part process, resulting in a single JSON object:
+                
+                1. **Impact Analysis & Graph Generation**:
+                    - Analyze the provided context (from the embedding store, which contains Java project structure nodes/dependencies).
+                    - Identify the *directly and indirectly impacted* packages/classes (nodes) and their immediate dependencies (links).
+                    - Map these impacted nodes and their connecting links into the required **JSON format for ngx-graph visualization**.
+                    - Group the nodes and links into logical clusters within the 'graphs' array.
+                    - Set **"critical": true** for any node or link that is directly affected or crucial to the change.
+                
+                2. **Test Plan Generation**:
+                    - Based on the identified impacted classes, generate a comprehensive TEST PLAN.
+                    - The plan must cover **Unit Tests**, **Integration Tests**, and potential **System/API Tests**.
+                    - The test plan content should be formatted using Markdown for readability.
+                
+                3. **Repository Identification**:
+                    - **Crucially, infer the name of the repository from the full package names in the context** (e.g., if a node ID is `evrentan.examples.springbootprojectexample.dto.Customer`, the repository name is `springbootprojectexample`). Use this inferred name for the 'repo' field value. If inference is impossible, use "unknown-repository".
+                
+                **REQUIRED OUTPUT FORMAT**:
+                Return ONLY a single, valid JSON object that strictly conforms to the following structure. Do NOT include any text, explanation, or markdown *before* or *after* the JSON block, and specifically exclude any metadata like `responseTime`.
+                
+                ```json
+                {
+                    "graphs": [
+                        {
+                            "nodes": [
+                                {
+                                    "id": "full.package.ClassName",
+                                    "label": "ClassName",
+                                    "critical": true
+                                },
+                                // ... more nodes
+                            ],
+                            "links": [
+                                {
+                                    "source": "full.package.SourceClass",
+                                    "target": "full.package.TargetClass",
+                                    "label": "depends",
+                                    "critical": false
+                                },
+                                // ... more links
+                            ]
+                        }
+                        // ... potentially more graph objects for different clusters
+                    ],
+                    "testPlan": {
+                        "title": "Test Plan for Change Request: [Brief Summary]",
+                        "testPlan": "The generated test plan content in **Markdown** format."
+                    },
+                    "repo": {
+                        "title": "Repo",
+                        "repo": "The inferred repository name (e.g., spring-boot-project-example)"
+                    }
+                }
+                ```
                 """.formatted(userPrompt);
     }
 
-private String buildTestPlanPrompt(String changeRequest, String nodes) {
-return """
-            You are a software test plan generator.
-            You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
-            Analyse the repository structure, functionality, public methods, and potential risks.
-    
-            Your task:
-            - Generate a complete TEST PLAN for the impacted files in the JSON.
-            - The test plan should include unit tests, integration tests, and system tests.
-            - Here are the impacted class names seperated by commas: %s
-            - Here are the changes the developer wants to make to the code: %s";
-            """.formatted(nodes, changeRequest);
-    }
-
-    private List<String> extractClassList(String response) {
-        List<String> nodes = new ArrayList<>();
-        if (response == null || response.isBlank()) return nodes;
-
-        for (String entry : response.split(",")) {
-            var trimmed = entry.trim();
-            if (!trimmed.isEmpty()) nodes.add(trimmed);
-        }
-        return nodes;
-    }
-
     public String chatWithAssistant(String sessionId, String message) {
-        var reply = createAssistant().chat(sessionId, message).trim();
-        int echoIndex = reply.lastIndexOf(message);
-        return (echoIndex > 0) ? reply.substring(echoIndex).trim() : reply;
+        // Use a placeholder ID if sessionId is null/empty for stateful chat memory
+        String chatId = (sessionId == null || sessionId.isEmpty()) ? "default_session" : sessionId;
+
+        var reply = createAssistant().chat(chatId, message).trim();
+
+        // New robust JSON extraction logic to remove all surrounding text and boilerplate.
+        return extractJsonBlock(reply);
+    }
+
+    /**
+     * Extracts the content within the first found JSON markdown code block (```json...```).
+     * @param reply The full LLM response string.
+     * @return The clean JSON string, or the original reply if no block is found.
+     */
+    private String extractJsonBlock(String reply) {
+        Matcher matcher = JSON_BLOCK_PATTERN.matcher(reply);
+        if (matcher.find()) {
+            // Return only the captured group (the clean JSON content)
+            return matcher.group(1).trim();
+        }
+        // Fallback: If the model returned a clean JSON without the code fence, return the reply.
+        // If it still contains unwanted boilerplate, it will be visible for further tuning.
+        return reply;
     }
 }

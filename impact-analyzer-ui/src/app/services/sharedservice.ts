@@ -15,8 +15,12 @@ export class Sharedservice {
     this.panelDataSource.next(msg);
   }
 
-  openPanel(data: { graphData: GraphResponse[]; testPlan: string }) {
+  openPanel(data: {repoName: string,  graphData: GraphResponse[]; testPlan: string }) {
     console.log('Shared Service - Opening panel with data:', data);
     this.panelDataSource.next(data);
+  }
+
+  resetPanel() {
+    this.panelDataSource.next({ repoName: '', graphData: [], testPlan: '' });
   }
 }

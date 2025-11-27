@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { Chatservice } from '../services/chatservice';
 import { Sharedservice } from '../services/sharedservice';
-import { GraphResponse } from '../models/graph-response';
 import { Message } from '../models/msg';
 import {PromptResponse} from "../models/prompt-response";
 
@@ -64,17 +63,21 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
                 console.log("Received response from backend:", response);
                 const graphData = response?.graphs ?? [];
                 const testPlan = response?.testPlan?.testPlan ?? '';
+                const repoName = response?.repo?.repo ?? '';
                 this.sharedservice.openPanel({
+                    repoName: repoName,
                     graphData: graphData,
                     testPlan: testPlan,
                 });
+                if (!graphData || graphData.length === 0) {
+                    this.messages.push({ text: 'No impact found in repository.', sender: 'Mia', timestamp: new Date() });
+                    this.shouldScrollToBottom = true;
+                    this.sharedservice.resetPanel();
+                }
             },
             error: (err) => {
                 console.error("Error from backend:", err);
-                this.sharedservice.openPanel({
-                    graphData: [],
-                    testPlan: '',
-                });
+                this.sharedservice.resetPanel();
                 this.messages.push({ text: 'No impact found in repo.', sender: 'Mia', timestamp: new Date() });
                 this.shouldScrollToBottom = true;
             }

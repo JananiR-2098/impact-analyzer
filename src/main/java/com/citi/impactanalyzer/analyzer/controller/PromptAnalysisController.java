@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -26,12 +25,34 @@ public class PromptAnalysisController {
         this.graphService = graphService;
     }
 
+
+    /**
+     * Generates an impact analysis report (dependency graph, test plan, and repo name)
+     * based on the user's prompt and returns the result as a raw JSON string.
+     *
+     * @param sessionId The current chat session ID for context memory.
+     * @param prompt The user's change request description.
+     * @return A ResponseEntity containing the raw JSON string of the analysis report.
+     * @throws IOException If there's an issue with I/O during analysis.
+     */
     @PostMapping("/impactedModules")
-    public ResponseEntity<?> getImpactedModules(@RequestParam String sessionId, @RequestBody String prompt) throws IOException {
-        logger.info("Received request to analyze impacted modules for prompt: {} sessionId: {}", prompt, sessionId);
-        List<String> nodes = promptAnalysisService.findNodeFromPrompt(sessionId, prompt);
-        String testPlan = nodes.isEmpty() ? null : promptAnalysisService.getTestPlan(sessionId, prompt, String.join(",", nodes));
-        Object impactedModules = graphService.getImpactedModulesNgx(nodes, testPlan);
-        return ResponseEntity.ok(impactedModules);
+    public ResponseEntity<String> getImpactedDependenciesJson(@RequestParam String sessionId, @RequestBody String prompt) throws IOException {
+        logger.info("Received request to get impacted dependency JSON for prompt: {} sessionId: {}", prompt, sessionId);
+
+        // Start timing the execution
+        long startTimeNano = System.nanoTime();
+
+        // Generate the core analysis report (JSON string containing graphs and test plan)
+        String impactedJson = promptAnalysisService.generateImpactAnalysisReport(sessionId, prompt);
+
+        // Calculate the elapsed time in seconds for logging purposes
+        long endTimeNano = System.nanoTime();
+        double durationSeconds = (endTimeNano - startTimeNano) / 1_000_000_000.0;
+
+        logger.info("Impact analysis report generation completed in {} seconds.", durationSeconds);
+
+        // Directly return the generated JSON string in the response body
+        // The Content-Type will automatically be application/json since it's a String response from a @RestController
+        return ResponseEntity.ok(impactedJson);
     }
 }

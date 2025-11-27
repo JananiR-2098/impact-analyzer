@@ -11,7 +11,15 @@
         [disabled]="selectedTab === 'graph'"
         (click)="selectedTab = 'graph'"
       >
-        Impacted Files and Code Flow
+        Impact Analysis Graph
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        [disabled]="selectedTab === 'impactedfiles'"
+        (click)="selectedTab = 'impactedfiles'"
+      >
+        Impacted Files
       </button>
       <button
         mat-raised-button
@@ -36,7 +44,13 @@
 
     <div class="analysis-outputs">
       <div *ngIf="selectedTab === 'graph'" class="output output-graph">
-        <div class="output-title">Impacted Files and Code Flow</div>
+        <div class="output-title">Impact Analysis Graph  and Code Flow</div>
+          <div *ngIf="reponame && reponame.length > 0">
+              <div class="repo-name" style="margin-bottom: 1rem;">
+                  <strong>Repository:</strong> {{ reponame }}
+              </div>
+          </div>
+
         <div *ngIf="graphData && graphData.length > 1">
           <button
             mat-raised-button
@@ -48,6 +62,25 @@
         </div>
         <div class="output-graph graph-wrapper" #graphWrapper *ngIf="selectedGraph">
           <app-graph [graph]="selectedGraph"> </app-graph>
+        </div>
+      </div>
+
+      <div *ngIf="selectedTab === 'impactedfiles'" class="output output-impactedfiles">
+        <div class="output-title">Impacted Files</div>
+          <div *ngIf="reponame && reponame.length > 0">
+              <div class="repo-name" style="margin-bottom: 1rem;">
+                  <strong>Repository:</strong> {{ reponame }}
+              </div>
+          </div>
+        <div class="output-content" #impactedFilesContent style="max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+          <div *ngFor="let node of selectedGraph?.nodes" style="border: 1px solid #ccc; border-radius: 8px; padding: 12px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.07);">
+            <div [ngStyle]="{color: node.critical ? 'red' : '#ff9800', fontWeight: 'bold', fontSize: '1.1em', marginBottom: '8px'}">
+              {{ node.critical ? 'Critical' : 'Medium' }}
+            </div>
+            <div style="word-break: break-word; font-size: 0.98em; color: #333;">
+              {{ node.id }}
+            </div>
+          </div>
         </div>
       </div>
 

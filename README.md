@@ -1,4 +1,4 @@
-# MIA (Markets Solution Sculptors-Impact Analyzer)
+﻿# MIA (Markets Solution Sculptors-Impact Analyzer)
 
 ## Overview
 MIA (Markets Solution Sculptors-Impact Analyzer) is an AI-powered code analysis platform that helps developers, architects, and QA teams understand the impact of code changes across large, complex codebases. Leveraging advanced LLMs (Vertex AI, LangChain4j), it extracts dependencies, builds a navigable dependency graph, and provides prompt-driven impact analysis and automated test plan generation. The platform features a modern Angular UI for visualization and a robust Spring Boot backend for orchestration and analysis.
@@ -50,7 +50,7 @@ MIA (Markets Solution Sculptors-Impact Analyzer) is an AI-powered code analysis 
 
 ## Architecture
 
-The architecture of MIA (Markets Solution Sculptors-Impact Analyzer) is designed for modularity, scalability, and seamless AI integration. Here’s how the system works:
+The architecture of MIA (Markets Solution Sculptors-Impact-Analyzer) is designed for modularity, scalability, and seamless AI integration. Here’s how the system works:
 
 - **User/Developer:** Interacts with the system via the Angular UI, submitting prompts or requests for impact analysis and test plan generation.
 - **Angular UI:** Modern, interactive interface for visualizing dependency graphs, submitting prompts, and downloading reports. Communicates with the backend via REST APIs.
@@ -72,7 +72,7 @@ The architecture of MIA (Markets Solution Sculptors-Impact Analyzer) is designed
 6. User can visualize results, download reports as PDF, and continue the session with chat memory.
 
 **Solution Diagram:**
-![High-Level Architecture](solution_diagram.jpg)
+![High-Level Architecture](solution_diagram_updated_demo.jpg)
 *Diagram created using draw.io*
 
 ---
@@ -209,7 +209,8 @@ To enable Vertex AI integration for LLM-powered analysis:
 ---
 
 ## License
-This project is licensed under the Apache 2.0 License. See [LICENSE.txt](./build/cloneRepo/LICENSE.txt) for details.
+
+This project is licensed under the Apache 2.0 License. See [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) for details.
 
 ---
 
