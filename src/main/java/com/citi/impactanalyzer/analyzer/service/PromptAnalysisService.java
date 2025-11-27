@@ -160,8 +160,17 @@ public class PromptAnalysisService {
         var assistantResponse = chatWithAssistant(sessionId, prompt);
         logger.info("User Change Request: {}", changeRequest);
         logger.info("Assistant Response: {}", assistantResponse);
-        // The chatWithAssistant now ensures the output is only the clean JSON block.
-        return assistantResponse;
+        return extractClassList(assistantResponse);
+    }
+
+    public String getTestPlan(String sessionId, String prompt) {
+        var query = "Analyze and provide test plan for: " + prompt;
+        return chatWithAssistant(sessionId, query);
+    }
+
+    public String getTestPlan(String changeRequest, String sessionId, String impactedFileJson) throws IOException {
+        var prompt = buildTestPlanPrompt(changeRequest, impactedFileJson);
+        return chatWithAssistant(sessionId, prompt);
     }
 
     private String buildGraphAndTestPlanPrompt(String userPrompt) {
@@ -171,7 +180,7 @@ public class PromptAnalysisService {
                 
                 You will receive a user query describing a change request: "%s"
                 
-                Your task is a three-part process, resulting in a single JSON object:
+                You will receive a user query describing a change request. %s
                 
                 1. **Impact Analysis & Graph Generation**:
                     - Analyze the provided context (from the embedding store, which contains Java project structure nodes/dependencies).
@@ -226,6 +235,31 @@ public class PromptAnalysisService {
                 }
                 ```
                 """.formatted(userPrompt);
+    }
+
+    private String buildTestPlanPrompt(String changeRequest, String impactedFileJson) {
+        return """
+            You are a software test plan generator.
+            You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
+            Analyse the repository structure, functionality, public methods, and potential risks.
+    
+            Your task:
+            - Generate a complete TEST PLAN for the impacted files in the JSON.
+            - The test plan should include unit tests, integration tests, and system tests.
+            - Here are the impacted class names seperated by commas: %s
+            - Here are the changes the developer wants to make to the code: %s";
+            """.formatted(nodes, changeRequest);
+    }
+
+    private List<String> extractClassList(String response) {
+        List<String> nodes = new ArrayList<>();
+        if (response == null || response.isBlank()) return nodes;
+
+        for (String entry : response.split(",")) {
+            var trimmed = entry.trim();
+            if (!trimmed.isEmpty()) nodes.add(trimmed);
+        }
+        return nodes;
     }
 
     public String chatWithAssistant(String sessionId, String message) {
