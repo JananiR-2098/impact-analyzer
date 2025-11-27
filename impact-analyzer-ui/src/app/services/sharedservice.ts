@@ -19,4 +19,8 @@ export class Sharedservice {
     console.log('Shared Service - Opening panel with data:', data);
     this.panelDataSource.next(data);
   }
+
+  resetPanel() {
+    this.panelDataSource.next({ repoName: '', graphData: [], testPlan: '' });
+  }
 }
