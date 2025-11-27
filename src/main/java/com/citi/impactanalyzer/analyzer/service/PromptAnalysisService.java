@@ -170,11 +170,11 @@ public class PromptAnalysisService {
                 - Identify and return the relevant class names that will be impacted by the change request.
                 - DO NOT invent class names.
                 - Exclude test classes.
-                - Return only the class names(present in embedding store also exclude package name) as plain text, separated by commas, with no explanation or additional formatting.
+                - Return only the class names present in embedding store also exclude package name as plain text, separated by commas, with no explanation or additional formatting.
                 """.formatted(userPrompt);
     }
 
-    private String buildTestPlanPrompt(String changeRequest, String impactedFileJson) {
+    private String buildTestPlanPrompt(String changeRequest, String nodes) {
         return """
             You are a software test plan generator.
             You will receive a codebase converted into JSON format containing the impacted files for the changes the developer wants to make.
@@ -183,8 +183,14 @@ public class PromptAnalysisService {
             Your task:
             - Generate a complete TEST PLAN for the impacted files in the JSON.
             - The test plan should include unit tests, integration tests, and system tests.
+            - Include only relevant test cases that directly relate to the changes.
+            - DO NOT give generic test cases unrelated to the changes.  
+            - Prioritize critical functionalities and edge cases.
+            - Provide the test plan in a structured format with clear sections and bullet points.
+            - DO NOT include date in your test plan.
             - Here are the impacted class names seperated by commas: %s
             - Here are the changes the developer wants to make to the code: %s";
+            - Return test plan for the class names present in embedding store 
             """.formatted(nodes, changeRequest);
     }
 
