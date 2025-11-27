@@ -69,14 +69,15 @@ export class InputPromptComponent implements OnInit, AfterViewChecked {
                     graphData: graphData,
                     testPlan: testPlan,
                 });
+                if (!graphData || graphData.length === 0) {
+                    this.messages.push({ text: 'No impact found in repository.', sender: 'Mia', timestamp: new Date() });
+                    this.shouldScrollToBottom = true;
+                    this.sharedservice.resetPanel();
+                }
             },
             error: (err) => {
                 console.error("Error from backend:", err);
-                this.sharedservice.openPanel({
-                    repoName: '',
-                    graphData: [],
-                    testPlan: '',
-                });
+                this.sharedservice.resetPanel();
                 this.messages.push({ text: 'No impact found in repo.', sender: 'Mia', timestamp: new Date() });
                 this.shouldScrollToBottom = true;
             }
